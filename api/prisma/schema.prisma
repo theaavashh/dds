@@ -1,0 +1,401 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id         String      @id @default(cuid())
+  fullname   String
+  username   String      @unique
+  email      String      @unique
+  password   String
+  role       String      @default("admin")
+  isActive   Boolean     @default(true)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  adminRoles AdminRole[]
+}
+
+model Role {
+  id          String      @id @default(cuid())
+  name        String      @unique // e.g., "admin", "manager", "editor", "viewer"
+  description String?
+  permissions String? // JSON string of permissions
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  adminRoles  AdminRole[]
+
+  @@map("roles")
+}
+
+model AdminRole {
+  id        String   @id @default(cuid())
+  adminId   String
+  roleId    String
+  admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([adminId, roleId])
+  @@map("admin_roles")
+}
+
+model Product {
+  id               String         @id @default(cuid())
+  productCode      String         @unique // CD-001, etc.
+  name             String
+  description      String
+  fullDescription  String? // Full detailed description (HTML content)
+  category         String // Ring, Necklace, etc.
+  subCategory      String? // Ladies/Casual, etc.
+  price            Float
+  imageUrl         String? // Main image URL (kept for backward compatibility)
+  stock            Int            @default(0)
+  isActive         Boolean        @default(true)
+  status           String         @default("draft") // "draft", "active", "inactive"
+  videoUrl         String? // Video URL for product demonstration
+
+  // Gold Fields
+  goldWeight         String? // 4 gms approx
+  goldPurity         String? // Gold purity (e.g., 14k, 18k, 22k)
+  goldType           String? // Gold type (e.g., Yellow, White, Rose)
+  goldCraftsmanship  String? // Craftsmanship details
+  goldDesignDescription String? // Design description
+  goldFinishedType   String? // Finished type
+  goldStones         String? // Stones used
+  goldStoneQuality   String? // Stone quality
+
+  // Diamond Fields
+  diamondType        String? // Diamond type
+  diamondShapeCut    String? // Shape and cut
+  diamondColorGrade  String? // Color grade
+  diamondClarityGrade String? // Clarity grade
+  diamondCutGrade    String? // Cut grade
+  diamondMetalDetails String? // Metal details
+  diamondCertification String? // Certification
+  diamondOrigin      String? // Origin
+  diamondCaratWeight String? // Carat weight
+  diamondDetails     String? // -
+  diamondQuantity    Int? // number of diamonds
+  diamondSize        String? // size of diamonds
+  diamondWeight      String? // weight of diamonds
+  diamondQuality     String? // quality of diamonds
+
+  // Platinum Fields
+  platinumWeight      String? // Weight
+  platinumType       String? // Type
+
+  // Silver Fields
+  silverWeight       String? // Weight
+  silverType         String? // Type
+
+  // Additional fields
+  orderDuration      String? // 7 days to make
+  jewelryType        String? // type of jewelry
+  materialType       String? // material type (14k, 18k, etc.)
+  metalType          String? // 14k, 18k, etc.
+  finish             String? // Polished, Matte, etc.
+
+  // Distribution channels
+  digitalBrowser Boolean @default(false)
+  website        Boolean @default(false)
+  distributor    Boolean @default(false)
+  normalUser     Boolean @default(false)
+  resellerUser   Boolean @default(false)
+
+  // Cultural field
+  culture String? // Newari, Brahmin/Chhetri, Tamang, etc.
+
+  // SEO fields
+  seoTitle       String? // Meta title
+  seoDescription String? // Meta description
+  seoKeywords    String? // Meta keywords
+  seoSlug        String? // URL slug
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  images        ProductImage[]
+  savedProducts SavedProduct[]
+  reviews       Review[]
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  altText   String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("product_images")
+}
+
+model Collection {
+  id            String         @id @default(cuid())
+  name          String
+  description   String?
+  userId        String // Simple user identifier (could be session ID or user ID)
+  isPublic      Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  savedProducts SavedProduct[]
+
+  @@map("collections")
+}
+
+model SavedProduct {
+  id           String     @id @default(cuid())
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id])
+  collectionId String
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  savedAt      DateTime   @default(now())
+
+  @@unique([productId, collectionId])
+  @@map("saved_products")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  title       String
+  iconUrl     String?  // Icon URL field
+  imageUrl    String?  // Image URL field
+  desktopBreadcrumbUrl String? // Desktop Breadcrumb Image
+  mobileBreadcrumbUrl  String? // Mobile Breadcrumb Image
+  link        String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  subcategories Subcategory[]
+
+  @@map("categories")
+}
+
+model Subcategory {
+  id         String   @id @default(cuid())
+  name       String
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("subcategories")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  name      String   // Reviewer name
+  email     String   // Reviewer email
+  rating    Int      // Rating (1-5)
+  title     String   // Review title
+  comment   String   // Review comment
+  isVerified Boolean  @default(false) // Whether the reviewer purchased the product
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reviews")
+}
+
+model AttributeOption {
+  id        String   @id @default(cuid())
+  attribute String   // The attribute name (e.g., "diamondType", "goldPurity")
+  value     String   // The option value (e.g., "Lab", "Natural", "18k")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([attribute, value])
+  @@map("attribute_options")
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model HeroSection {
+  id              String   @id @default(cuid())
+  desktopImageUrl String?
+  mobileImageUrl  String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("hero_sections")
+}
+
+model JewelryShowcase {
+  id          String   @id @default(cuid())
+  title       String?
+  quote1      String?
+  quote2      String?
+  quote3      String?
+  buttonText  String?
+  leftImage   String?
+  rightImage  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("jewelry_showcases")
+}
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("newsletter_subscriptions")
+}
+
+model Testimonial {
+  id         String   @id @default(cuid())
+  clientName String
+  clientTitle String?
+  company    String?
+  content    String
+  rating     Int?
+  imageUrl   String?
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+model TestimonialSection {
+  id        String   @id @default(cuid())
+  title     String
+  subtitle  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("testimonial_sections")
+}
+
+model Service {
+  id        String   @id @default(cuid())
+  title     String
+  imageUrl  String?
+  link      String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("services")
+}
+
+model Video {
+  id        String   @id @default(cuid())
+  title     String?
+  videoUrl  String
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("videos")
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  imageUrl  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("banners")
+}
+
+model AboutPage {
+  id         String   @id @default(cuid())
+  title      String
+  description String
+  ctaLink    String?
+  ctaTitle   String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("about_pages")
+}
+
+model Distributor {
+  id            String    @id @default(cuid())
+  companyName   String?
+  firstName     String
+  lastName      String
+  email         String    @unique
+  password      String
+  phone         String
+  city          String
+  country       String
+  status        String    @default("pending") // "pending", "approved", "rejected", "blocked"
+  totalOrders   Int       @default(0)
+  totalRevenue  Float     @default(0)
+  lastLogin     DateTime?
+  inquiries     Inquiry[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("distributors")
+}
+
+model Inquiry {
+  id            String        @id @default(cuid())
+  inquiryNumber String        @unique // INQ-1001, etc.
+  distributorId String
+  distributor   Distributor   @relation(fields: [distributorId], references: [id])
+  status        String        @default("pending") // "pending", "contacted", "closed", "cancelled"
+  totalItems    Int
+  notes         String?
+  items         InquiryItem[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("inquiries")
+}
+
+model InquiryItem {
+  id          String  @id @default(cuid())
+  inquiryId   String
+  inquiry     Inquiry @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
+  productId   String
+  productCode String
+  name        String
+  category    String
+  quantity    Int
+  goldWeight  String?
+  goldPurity  String?
+  price       Float? // Price at the time of inquiry (if known)
+
+  @@map("inquiry_items")
+}

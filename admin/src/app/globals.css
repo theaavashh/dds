@@ -1,0 +1,185 @@
+@import "tailwindcss";
+
+/* Custom OTF Fonts */
+@font-face {
+  font-family: 'CustomFont';
+  src: url('/fonts/title-regular.f7f2da3f7d1f78b3f788.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.custom-font {
+  font-family: 'CustomFont', sans-serif;
+}
+
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-public-sans);
+ 
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-public-sans), sans-serif;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none !important;  /* Internet Explorer 10+ */
+  scrollbar-width: none !important;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;  /* Safari and Chrome */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.scrollbar-hide::-webkit-scrollbar-track {
+  display: none !important;
+}
+
+.scrollbar-hide::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+/* Line clamp utility for text truncation */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Rich Text Editor - Full width and icon sizes */
+.rich-text-editor {
+  width: 100% !important;
+}
+
+.w-md-editor {
+  width: 100% !important;
+}
+
+/* Increase font size in rich text editor content */
+.w-md-editor .w-md-editor-text-container {
+  font-size: 18px !important;
+  line-height: 1.6 !important;
+}
+
+.w-md-editor .w-md-editor-text-container textarea {
+  font-size: 18px !important;
+  line-height: 1.6 !important;
+  font-family: inherit !important;
+}
+
+.w-md-editor .w-md-editor-text-container .w-md-editor-text {
+  font-size: 18px !important;
+  line-height: 1.6 !important;
+}
+
+/* Target the actual typing area more specifically */
+.w-md-editor-text-container textarea,
+.w-md-editor-text-container .w-md-editor-text,
+.w-md-editor-text-container .w-md-editor-text-input {
+  font-size: 18px !important;
+  line-height: 1.6 !important;
+  color: #000000 !important;
+}
+
+/* Target the markdown editor content area */
+.w-md-editor .w-md-editor-text-container .w-md-editor-text-input {
+  font-size: 18px !important;
+  line-height: 1.6 !important;
+}
+
+/* Preview area font size */
+.w-md-editor .w-md-editor-preview {
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+}
+
+/* Priority input field text color */
+input[type="number"],
+input[type="number"]:focus,
+input[type="number"]:active,
+input[type="number"]:hover {
+  color: #000000 !important;
+}
+
+input[type="number"]::placeholder {
+  color: #6b7280 !important;
+}
+
+/* More specific selectors for priority fields */
+.w-full input[type="number"],
+.px-3 input[type="number"],
+.py-2 input[type="number"] {
+  color: #000000 !important;
+}
+
+/* Target specific priority input classes */
+input[type="number"][placeholder="0"] {
+  color: #000000 !important;
+}
+
+/* Very specific selector for priority input */
+.w-full.px-3.py-2.border.border-gray-300.rounded-lg input[type="number"],
+input[type="number"].text-black {
+  color: #000000 !important;
+}
+
+/* Override any gray text styles */
+input[type="number"] {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+
+.w-md-editor .w-md-editor-toolbar {
+  padding: 8px 12px;
+}
+
+.w-md-editor .w-md-editor-toolbar button {
+  width: 32px !important;
+  height: 32px !important;
+  padding: 6px !important;
+  margin: 2px !important;
+}
+
+.w-md-editor .w-md-editor-toolbar button svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.w-md-editor .w-md-editor-toolbar .w-md-editor-toolbar-divider {
+  width: 1px;
+  height: 24px;
+  margin: 4px 8px;
+  background-color: #e5e7eb;
+}
+
+/* Make toolbar buttons more visible */
+.w-md-editor .w-md-editor-toolbar button:hover {
+  background-color: #f3f4f6 !important;
+  border-radius: 4px !important;
+}
+
+.w-md-editor .w-md-editor-toolbar button.active {
+  background-color: #dbeafe !important;
+  color: #1d4ed8 !important;
+}

@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@font-face {
+  font-family: "tan-agean";
+  src: url("/font/TAN - AEGEAN Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+
+}
+
+.tan-agean {
+  font-family: "tan-agean";
+}
+
+
+
+/* Override React Toastify Width */
+:root {
+  --toastify-toast-width: 650px;
+}
+
+.Toastify__toast-container {
+  width: var(--toastify-toast-width) !important;
+  max-width: 90vw !important;
+  padding: 0 !important;
+  /* Ensure padding doesn't affect width calculation */
+}
+
+/* Ensure the toast element itself fills the container */
+.Toastify__toast {
+  width: 100% !important;
+  padding: 16px 24px !important;
+  /* Optional: Adjust padding for wider look */
+}
+
+/* Specific media query for larger screens to enforce width */
+@media only screen and (min-width: 480px) {
+  .Toastify__toast-container {
+    width: 650px !important;
+  }
+}

@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+
+# Build output
+/dist
+/build
+/out
+
+
+/uploads
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Temporary folders
+tmp/
+temp/
+
+# Production build artifacts
+.next/
+.nuxt/
+dist-server/
+
+# Database
+*.db
+*.db-journal
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Prisma
+prisma/migrations/
+prisma/schema.prisma.bak
+
+# Uploads (if you don't want to commit them)
+uploads/
+
+# OS generated files
+ehthumbs.db
+Icon?
+!Icon
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
