@@ -5,9 +5,6 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { apiGet, apiDelete } from "@/lib/apiClient";
 import { getApiBaseUrl } from "@/lib/api";
 import { Download, RefreshCw, ChevronDown, Trash2, ChevronLeft, ChevronRight, MoreVertical, X } from "lucide-react";
-import { Urbanist } from "next/font/google";
-
-const urbanist = Urbanist({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-urbanist" });
 
 interface Subscription {
   id: string;
@@ -197,7 +194,7 @@ export default function EmailSubscriptionsPage() {
 
   return (
     <DashboardLayout title="Email Subscriptions">
-      <div className={`bg-white rounded-2xl border border-gray-200 shadow-sm ${urbanist.className}`}>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 relative">
           <div className="flex items-center gap-3">
             <h2 className="custom-font text-2xl text-black">Email Subscription</h2>

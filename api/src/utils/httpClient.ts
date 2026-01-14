@@ -1,23 +1,24 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+// import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+// Note: This file is likely meant for frontend use, not backend
 
 // This file is likely meant for frontend use, not backend
 // For the backend API, we'll create a simplified version
 
 // Create axios instance with default configuration
-const createHttpClient = (baseURL?: string) => {
-  // In a Node.js environment, we won't use localStorage or window
-  // This file might be misplaced in the backend project
-  return {
-    get: () => {},
-    post: () => {},
-    put: () => {},
-    delete: () => {},
-    interceptors: {
-      request: { use: () => {}, eject: () => {} },
-      response: { use: () => {}, eject: () => {} }
-    }
-  };
-};
+// const createHttpClient = (_baseURL?: string) => {
+//   // In a Node.js environment, we won't use localStorage or window
+//   // This file might be misplaced in the backend project
+//   return {
+//     get: () => {},
+//     post: () => {},
+//     put: () => {},
+//     delete: () => {},
+//     interceptors: {
+//       request: { use: () => {}, eject: () => {} },
+//       response: { use: () => {}, eject: () => {} }
+//     }
+//   };
+// };
 
 // API Response wrapper
 export interface ApiResponse<T = any> {
@@ -34,33 +35,33 @@ export interface ApiResponse<T = any> {
 
 // Generic API methods
 export class ApiClient {
-  private client: any;
+  // private client: any | null = null; // Not used
 
-  constructor(baseURL?: string) {
-    this.client = createHttpClient(baseURL);
+  constructor(_baseURL?: string) {
+    // Client is not used in this implementation
   }
 
-  async get<T>(url: string, config?: any): Promise<ApiResponse<T>> {
+  async get<T>(_url: string, _config?: any): Promise<ApiResponse<T>> {
     // Implementation would go here
     return { data: {} as T, success: true };
   }
 
-  async post<T>(url: string, data?: any, config?: any): Promise<ApiResponse<T>> {
+  async post<T>(_url: string, _data?: any, _config?: any): Promise<ApiResponse<T>> {
     // Implementation would go here
     return { data: {} as T, success: true };
   }
 
-  async put<T>(url: string, data?: any, config?: any): Promise<ApiResponse<T>> {
+  async put<T>(_url: string, _data?: any, _config?: any): Promise<ApiResponse<T>> {
     // Implementation would go here
     return { data: {} as T, success: true };
   }
 
-  async patch<T>(url: string, data?: any, config?: any): Promise<ApiResponse<T>> {
+  async patch<T>(_url: string, _data?: any, _config?: any): Promise<ApiResponse<T>> {
     // Implementation would go here
     return { data: {} as T, success: true };
   }
 
-  async delete<T>(url: string, config?: any): Promise<ApiResponse<T>> {
+  async delete<T>(_url: string, _config?: any): Promise<ApiResponse<T>> {
     // Implementation would go here
     return { data: {} as T, success: true };
   }

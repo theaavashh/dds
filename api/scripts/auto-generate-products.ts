@@ -6,7 +6,8 @@ const prisma = new PrismaClient();
 
 // Function to generate a unique product code
 async function generateProductCode(category: string): Promise<string> {
-  const prefix = category.substring(0, 4).toUpperCase();
+  const categoryInitial = category.charAt(0).toUpperCase();
+  const prefix = `CD-${categoryInitial}-`;
   const count = await prisma.product.count({
     where: {
       productCode: {
@@ -92,7 +93,7 @@ async function autoGenerateProducts() {
             const productName = toTitleCase(fileNameWithoutExt.replace(/[-_]/g, ' '));
 
             // Generate product code
-            const productCode = await generateProductCode(category.substring(0, 4));
+            const productCode = await generateProductCode(category);
 
             // Check if product already exists
             const existingProduct = await prisma.product.findUnique({
@@ -116,7 +117,7 @@ async function autoGenerateProducts() {
                 price: Math.floor(Math.random() * 5000) + 1000, // Random price between 1000-6000
                 stock: Math.floor(Math.random() * 50) + 1, // Random stock between 1-50
                 isActive: true,
-                status: 'active',
+                status: 'draft',
                 digitalBrowser: true,
                 website: true,
                 distributor: false,

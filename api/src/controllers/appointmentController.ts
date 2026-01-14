@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { ApiResponse } from '../types';
-import prisma from '../config/database';
 
 // Get all appointments
 export const getAllAppointments = async (_req: Request, res: Response<ApiResponse<unknown>>) => {
@@ -21,9 +20,8 @@ export const getAllAppointments = async (_req: Request, res: Response<ApiRespons
 };
 
 // Get appointment by ID
-export const getAppointmentById = async (req: Request, res: Response<ApiResponse<unknown>>) => {
+export const getAppointmentById = async (_req: Request, res: Response<ApiResponse<unknown>>) => {
   try {
-    const { id } = req.params;
     // Since there's no appointment model in the schema, return not found
     res.status(404).json({
       success: false,
@@ -39,7 +37,7 @@ export const getAppointmentById = async (req: Request, res: Response<ApiResponse
 };
 
 // Create appointment
-export const createAppointment = async (req: Request, res: Response<ApiResponse<unknown>>) => {
+export const createAppointment = async (_req: Request, res: Response<ApiResponse<unknown>>) => {
   try {
     // Since there's no appointment model in the schema, return error
     res.status(404).json({
@@ -55,10 +53,26 @@ export const createAppointment = async (req: Request, res: Response<ApiResponse<
   }
 };
 
-// Update appointment
-export const updateAppointment = async (req: Request, res: Response<ApiResponse<unknown>>) => {
+// Update appointment status
+export const updateAppointmentStatus = async (_req: Request, res: Response<ApiResponse<unknown>>) => {
   try {
-    const { id } = req.params;
+    // Since there's no appointment model in the schema, return error
+    res.status(404).json({
+      success: false,
+      message: 'Appointment status update not supported'
+    });
+  } catch (error) {
+    console.error('Error updating appointment status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating appointment status'
+    });
+  }
+};
+
+// Update appointment
+export const updateAppointment = async (_req: Request, res: Response<ApiResponse<unknown>>) => {
+  try {
     // Since there's no appointment model in the schema, return error
     res.status(404).json({
       success: false,
@@ -74,9 +88,8 @@ export const updateAppointment = async (req: Request, res: Response<ApiResponse<
 };
 
 // Delete appointment
-export const deleteAppointment = async (req: Request, res: Response<ApiResponse<unknown>>) => {
+export const deleteAppointment = async (_req: Request, res: Response<ApiResponse<unknown>>) => {
   try {
-    const { id } = req.params;
     // Since there's no appointment model in the schema, return error
     res.status(404).json({
       success: false,
@@ -90,4 +103,3 @@ export const deleteAppointment = async (req: Request, res: Response<ApiResponse<
     });
   }
 };
-

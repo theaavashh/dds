@@ -18,7 +18,7 @@ export const roleValidation = [
 ];
 
 // Get all roles
-export const getAllRoles = async (req: Request, res: Response) => {
+export const getAllRoles = async (_req: Request, res: Response) => {
   try {
     const roles = await prisma.role.findMany({
       where: { isActive: true },

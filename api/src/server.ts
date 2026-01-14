@@ -121,7 +121,7 @@ app.get('/health', (_req, res) => {
 });
 
 // CSRF token endpoint
-app.get('/api/csrf-token', csrfGenerate, (req, res) => {
+app.get('/api/csrf-token', csrfGenerate, (_req, res) => {
   res.status(200).json({ csrfToken: res.locals.csrfToken });
 });
 

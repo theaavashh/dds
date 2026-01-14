@@ -121,25 +121,10 @@ export const trackSession = async (req: Request, res: Response<ApiResponse<unkno
   try {
     const {
       sessionId,
-      userId,
       ipAddress,
       userAgent,
-      country,
-      region,
-      city,
-      referrer,
       pageUrl,
-      pageTitle,
-      timeOnPage,
-      bounceRate = false,
-      deviceType,
-      browser,
-      os,
-      screenResolution,
-      language,
-      isNewVisitor = true,
-      conversion = false,
-      goalType
+      pageTitle
     } = req.body;
 
     if (!sessionId || !ipAddress || !userAgent || !pageUrl) {

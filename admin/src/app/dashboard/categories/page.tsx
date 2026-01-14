@@ -565,7 +565,7 @@ const CategoriesPage = () => {
           </div>
           <button
             onClick={openCategoryModal}
-            className="bg-[#9A8873] rounded-sm text-xl text-white px-3 py-3  hover:bg-[#242f40]  transition-colors font-medium flex items-center"
+            className="bg-[#DFC97E] rounded-sm text-xl text-black px-3 py-3  transition-colors font-medium flex items-center"
           >
             <Plus className="w-5 h-5 mr-2" />
             Add New Category
@@ -604,7 +604,7 @@ const CategoriesPage = () => {
               <p className="text-gray-500 mb-4 text-xl">Create your first category to get started</p>
               <button
                 onClick={openCategoryModal}
-                className="bg-purple-600 text-white text-2xl px-6 py-2 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center mx-auto"
+                className="bg-[#DFC97E] text-black text-2xl px-6 py-2 rounded-lg  transition-colors flex items-center justify-center mx-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create First Category
@@ -832,7 +832,7 @@ const CategoriesPage = () => {
                       placeholder="Enter the redirector url"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black placeholder-black"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Required. Enter a relative path (e.g., /foods) or full URL for internal navigation.</p>
+                    <p className="text-xs text-gray-500 mt-1">Required. Enter a relative path (e.g., /products/rings) or full URL for internal navigation.</p>
                   </div>
 
                   {/* Icon Upload */}
@@ -910,7 +910,7 @@ const CategoriesPage = () => {
                           <img
                             src={(imagePreview.startsWith('http') || imagePreview.startsWith('blob:') || imagePreview.startsWith('data:')) ? imagePreview : getImageUrl(imagePreview)}
                             alt="Image Preview"
-                            className="w-full h-40 object-cover rounded-lg border border-gray-300"
+                            className="w-full h-auto object-cover rounded-lg border border-gray-300"
                             onError={(e) => {
                               console.error('Image preview failed to load:', imagePreview);
                               e.currentTarget.src = 'https://via.placeholder.com/400x200?text=No+Image';
@@ -958,7 +958,7 @@ const CategoriesPage = () => {
                           <img
                             src={(desktopBreadcrumbPreview.startsWith('http') || desktopBreadcrumbPreview.startsWith('blob:') || desktopBreadcrumbPreview.startsWith('data:')) ? desktopBreadcrumbPreview : getImageUrl(desktopBreadcrumbPreview)}
                             alt="Desktop Breadcrumb Preview"
-                            className="w-full h-24 object-cover rounded-lg border border-gray-300"
+                            className="w-full h-auto object-cover rounded-lg border border-gray-300"
                             onError={(e) => {
                               e.currentTarget.src = 'https://via.placeholder.com/400x100?text=No+Image';
                             }}
@@ -1000,7 +1000,7 @@ const CategoriesPage = () => {
                           <img
                             src={(mobileBreadcrumbPreview.startsWith('http') || mobileBreadcrumbPreview.startsWith('blob:') || mobileBreadcrumbPreview.startsWith('data:')) ? mobileBreadcrumbPreview : getImageUrl(mobileBreadcrumbPreview)}
                             alt="Mobile Breadcrumb Preview"
-                            className="w-full h-24 object-cover rounded-lg border border-gray-300"
+                            className="w-full h-auto object-cover rounded-lg border border-gray-300"
                             onError={(e) => {
                               e.currentTarget.src = 'https://via.placeholder.com/200x100?text=No+Image';
                             }}

@@ -6,7 +6,7 @@ export default function Hero() {
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black">
       <Image
-        src="/banner.png"
+        src="/CD Home page up.jpg"
         alt="Crafting the future of fine diamonds"
         fill
         priority

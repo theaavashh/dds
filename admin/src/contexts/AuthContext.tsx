@@ -79,6 +79,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return false;
     } catch (error) {
       console.error('Error fetching current user:', error);
+      // Check if this is a network error
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        console.warn('Network error - API server may not be running');
+      }
       // Clear user state on error
       setUser(null);
       return false;

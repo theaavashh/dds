@@ -108,8 +108,87 @@ function DashboardContent() {
   });
   const [dashboardStats, setDashboardStats] = useState<any>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
+
+  // Hardcoded data for charts
+  const hardcodedStats = {
+    overview: {
+      totalProducts: 156,
+      totalQuoteRequests: 89,
+      totalCollections: 12,
+      totalVisitors: 2456
+    },
+    growth: {
+      quoteRequests: {
+        current: 89,
+        previous: 67,
+        percentage: 32.8
+      }
+    },
+    categories: [
+      { name: 'Rings', count: 45 },
+      { name: 'Necklaces', count: 38 },
+      { name: 'Earrings', count: 32 },
+      { name: 'Bracelets', count: 28 },
+      { name: 'Pendants', count: 13 },
+      { name: 'Mangalsutras', count: 18 },
+      { name: 'Bangles', count: 22 }
+    ],
+    recentQuoteRequests: [
+      { name: 'Sarah Johnson', createdAt: '2024-01-14T10:30:00Z', status: 'New' },
+      { name: 'Michael Chen', createdAt: '2024-01-14T09:15:00Z', status: 'Contacted' },
+      { name: 'Emma Williams', createdAt: '2024-01-13T16:45:00Z', status: 'New' },
+      { name: 'James Anderson', createdAt: '2024-01-13T14:20:00Z', status: 'Pending' },
+      { name: 'Olivia Davis', createdAt: '2024-01-12T11:30:00Z', status: 'New' },
+      { name: 'Robert Miller', createdAt: '2024-01-12T08:45:00Z', status: 'Contacted' },
+      { name: 'Sophie Taylor', createdAt: '2024-01-11T15:20:00Z', status: 'New' }
+    ]
+  };
   const [appointments, setAppointments] = useState<any[]>([]);
   const [isLoadingAppointments, setIsLoadingAppointments] = useState(false);
+
+  // Hardcoded appointments data
+  const hardcodedAppointments = [
+    {
+      id: '1',
+      name: 'Amanda Foster',
+      email: 'amanda.f@email.com',
+      preferredDate: '2024-01-15T14:00:00Z',
+      preferredTime: '2:00 PM',
+      status: 'confirmed'
+    },
+    {
+      id: '2',
+      name: 'David Martinez',
+      email: 'david.m@email.com',
+      preferredDate: '2024-01-15T16:30:00Z',
+      preferredTime: '4:30 PM',
+      status: 'pending'
+    },
+    {
+      id: '3',
+      name: 'Lisa Thompson',
+      email: 'lisa.t@email.com',
+      preferredDate: '2024-01-16T10:00:00Z',
+      preferredTime: '10:00 AM',
+      status: 'confirmed'
+    },
+    {
+      id: '4',
+      name: 'Kevin Wilson',
+      email: 'kevin.w@email.com',
+      preferredDate: '2024-01-16T13:30:00Z',
+      preferredTime: '1:30 PM',
+      status: 'pending'
+    },
+    {
+      id: '5',
+      name: 'Rachel Green',
+      email: 'rachel.g@email.com',
+      preferredDate: '2024-01-17T11:00:00Z',
+      preferredTime: '11:00 AM',
+      status: 'confirmed'
+    }
+  ];
   const searchParams = useSearchParams();
 
   // Read tab parameter from URL
@@ -130,8 +209,9 @@ function DashboardContent() {
   // Fetch dashboard stats when dashboard tab is active
   useEffect(() => {
     if (activeTab === 'dashboard') {
-      fetchDashboardStats();
-      fetchAppointments();
+      // Use hardcoded data instead of fetching
+      setDashboardStats(hardcodedStats);
+      setAppointments(hardcodedAppointments);
     }
   }, [activeTab]);
 
@@ -472,7 +552,7 @@ function DashboardContent() {
         return (
           <div className="space-y-6">
             <SectionTitle className="pt-4 italic font-bold">Dashboard Overview</SectionTitle>
-            {isLoadingStats ? (
+            {false ? (
               <div className="flex items-center justify-center h-64">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 <span className="ml-2 text-gray-600">Loading dashboard data...</span>
@@ -613,7 +693,7 @@ function DashboardContent() {
                     </div>
                   </div>
                   {
-                    isLoadingAppointments ? (
+                    false ? (
                       <div className="flex items-center justify-center h-32">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                       </div>

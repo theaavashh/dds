@@ -64,60 +64,137 @@ export default function AnalyticsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('30d');
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch analytics data
-  const fetchAnalytics = useCallback(async (period: string = '30d') => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await apiService.get<AnalyticsData>(`/analytics/overview?period=${period}`);
-      if (response.success && response.data) {
-        setAnalyticsData(response.data);
-      } else {
-        throw new Error(response.error || 'Failed to fetch analytics data');
-      }
-    } catch (error: unknown) {
-      console.error('Error fetching analytics:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch analytics data';
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
+  // Hardcoded analytics data
+  const hardcodedAnalyticsData: AnalyticsData = {
+    overview: {
+      totalVisitors: 45678,
+      uniqueVisitors: 32145,
+      totalPageViews: 123456,
+      bounceRate: 34.5,
+      avgSessionDuration: 245, // seconds
+      conversions: 892,
+      conversionRate: 2.8
+    },
+    geography: {
+      topCountries: [
+        { country: 'United States', visitors: 15678 },
+        { country: 'India', visitors: 8934 },
+        { country: 'United Kingdom', visitors: 5623 },
+        { country: 'Canada', visitors: 3456 },
+        { country: 'Australia', visitors: 2345 },
+        { country: 'Germany', visitors: 1876 },
+        { country: 'France', visitors: 1543 },
+        { country: 'Japan', visitors: 1234 }
+      ],
+      topRegions: [
+        { region: 'California', visitors: 4567 },
+        { region: 'New York', visitors: 3890 },
+        { region: 'Texas', visitors: 3234 },
+        { region: 'Florida', visitors: 2876 },
+        { region: 'Illinois', visitors: 1987 },
+        { region: 'Pennsylvania', visitors: 1654 },
+        { region: 'Ohio', visitors: 1432 },
+        { region: 'Georgia', visitors: 1234 }
+      ]
+    },
+    technology: {
+      deviceTypes: [
+        { deviceType: 'Desktop', count: 23456 },
+        { deviceType: 'Mobile', count: 18765 },
+        { deviceType: 'Tablet', count: 3457 }
+      ],
+      browsers: [
+        { browser: 'Chrome', count: 25678 },
+        { browser: 'Safari', count: 9876 },
+        { browser: 'Firefox', count: 5432 },
+        { browser: 'Edge', count: 3210 },
+        { browser: 'Opera', count: 1482 },
+        { browser: 'Other', count: 876 }
+      ]
+    },
+    content: {
+      topPages: [
+        { pageUrl: '/dashboard', views: 8765 },
+        { pageUrl: '/products', views: 6543 },
+        { pageUrl: '/categories', views: 5432 },
+        { pageUrl: '/about', views: 4321 },
+        { pageUrl: '/contact', views: 3210 },
+        { pageUrl: '/services', views: 2876 },
+        { pageUrl: '/blog', views: 1987 },
+        { pageUrl: '/faq', views: 1543 }
+      ],
+      topReferrers: [
+        { referrer: 'google.com', count: 12345 },
+        { referrer: 'facebook.com', count: 5432 },
+        { referrer: 'instagram.com', count: 3210 },
+        { referrer: 'twitter.com', count: 1987 },
+        { referrer: 'linkedin.com', count: 1543 },
+        { referrer: 'direct', count: 9876 },
+        { referrer: 'youtube.com', count: 876 },
+        { referrer: 'other', count: 654 }
+      ]
+    },
+    charts: {
+      dailyVisitors: [
+        { date: '2024-01-01', visitors: 1234, new_visitors: 567 },
+        { date: '2024-01-02', visitors: 1456, new_visitors: 678 },
+        { date: '2024-01-03', visitors: 1678, new_visitors: 789 },
+        { date: '2024-01-04', visitors: 1890, new_visitors: 890 },
+        { date: '2024-01-05', visitors: 2101, new_visitors: 901 },
+        { date: '2024-01-06', visitors: 2234, new_visitors: 912 },
+        { date: '2024-01-07', visitors: 2345, new_visitors: 923 }
+      ]
     }
+  };
+
+  // Hardcoded real-time data
+  const hardcodedRealTimeData: RealTimeData = {
+    activeVisitors: 127,
+    currentPageViews: 342,
+    topPagesNow: [
+      { pageUrl: '/dashboard', views: 45 },
+      { pageUrl: '/products', views: 32 },
+      { pageUrl: '/categories', views: 28 },
+      { pageUrl: '/about', views: 15 },
+      { pageUrl: '/contact', views: 7 }
+    ],
+    recentCountries: [
+      { country: 'United States', visitors: 45 },
+      { country: 'India', visitors: 23 },
+      { country: 'United Kingdom', visitors: 18 },
+      { country: 'Canada', visitors: 12 },
+      { country: 'Australia', visitors: 8 }
+    ]
+  };
+
+  // Note: Using hardcoded data instead of API calls
+
+  // Initial load - use hardcoded data
+  useEffect(() => {
+    // Set hardcoded data immediately
+    setAnalyticsData(hardcodedAnalyticsData);
+    setRealTimeData(hardcodedRealTimeData);
+    setLoading(false);
   }, []);
 
-  // Fetch real-time data
-  const fetchRealTimeData = useCallback(async () => {
-    try {
-      setRealTimeLoading(true);
-      
-      const response = await apiService.get<RealTimeData>('/analytics/realtime');
-      if (response.success && response.data) {
-        setRealTimeData(response.data);
-      }
-    } catch (error: unknown) {
-      console.error('Error fetching real-time data:', error);
-    } finally {
-      setRealTimeLoading(false);
-    }
-  }, []);
-
-  // Initial load
+  // Simulate real-time data updates every 30 seconds
   useEffect(() => {
-    fetchAnalytics(selectedPeriod);
-    fetchRealTimeData();
-  }, [fetchAnalytics, fetchRealTimeData, selectedPeriod]);
-
-  // Auto-refresh real-time data every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(fetchRealTimeData, 30000);
+    const interval = setInterval(() => {
+      // Update real-time data with random variations
+      setRealTimeData(prev => ({
+        ...prev!,
+        activeVisitors: prev!.activeVisitors + Math.floor(Math.random() * 11) - 5, // Random change between -5 and +5
+        currentPageViews: prev!.currentPageViews + Math.floor(Math.random() * 21) - 10 // Random change between -10 and +10
+      }));
+    }, 30000);
     return () => clearInterval(interval);
-  }, [fetchRealTimeData]);
+  }, []);
 
   // Handle period change
   const handlePeriodChange = (period: string) => {
     setSelectedPeriod(period);
-    fetchAnalytics(period);
+    // For now, just update the period without fetching
+    toast.success(`Analytics period changed to ${period}`);
   };
 
   // Get device icon

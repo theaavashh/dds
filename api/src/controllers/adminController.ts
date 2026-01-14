@@ -273,7 +273,7 @@ export const updateAdmin = async (req: Request<{ id: string }, {}, AdminUpdateRe
     }
 
     // Update admin and roles
-    const admin = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       const updatedAdmin = await tx.admin.update({
         where: { id },
         data: updateData

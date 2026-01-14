@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '../config/database';
-import { AuthenticatedRequest, JWTPayload, ApiResponse, Distributor } from '../types';
+import { AuthenticatedRequest, JWTPayload, ApiResponse } from '../types';
 
 export const distributorAuthMiddleware = async (req: AuthenticatedRequest, res: Response<ApiResponse<unknown>>, next: NextFunction) => {
   try {

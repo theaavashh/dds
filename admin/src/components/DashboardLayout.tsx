@@ -1,47 +1,41 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import {
-  BarChart3,
-  FolderOpen,
-  Package,
-  Percent,
-  Settings,
-  LogOut,
-  Menu,
-  X,
-  Home,
-  TrendingUp,
-  ShoppingCart,
-  Users,
-  DollarSign,
-  FileText,
-  Star,
-  Package2,
-  Layers,
-  BarChart,
-  Mail,
-  Gift,
-  Target,
-  UserCheck,
-  MessageSquare,
-  FileText as ContentIcon,
-  Image as SliderIcon,
-  Newspaper as ArticleIcon,
-  Info as AboutIcon,
-  Video,
-  ChevronRight,
-  ChevronLeft,
-  ChevronDown,
-  Database,
-  Utensils,
-  Award,
-  Heart,
-  Key,
+import { 
+  Home, 
+  BarChart3, 
+  TrendingUp, 
+  Package, 
+  FolderOpen, 
+  ShoppingCart, 
+  MessageSquare, 
+  Users, 
+  Star, 
+  DollarSign, 
+  FileText, 
+  Settings, 
+  UserCheck, 
+  Key, 
+  ChevronDown, 
+  ChevronRight, 
+  ChevronLeft, 
   ChevronUp,
-  Store,
-  FileCheck
+  Menu, 
+  X, 
+  Search, 
+  Bell, 
+  LogOut, 
+  Layers, 
+  SlidersHorizontal, 
+  Video, 
+  Info,
+  Shield,
+  HelpCircle,
+  Gavel,
+  Percent,
+  Gift,
+  Mail
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
@@ -68,64 +62,25 @@ interface NavigationItem {
 
 const NAVIGATION_ITEMS: NavigationItem[] = [
   {
-    id: "dashboard",
-    label: "Dashboard",
+    id: "main",
+    label: "Main",
     icon: Home,
-    path: "/dashboard",
     children: [
-      { id: "quick-insights", label: "Quick Insights", icon: TrendingUp, path: "/dashboard" }
+      { id: "dashboard", label: "Dashboard", icon: BarChart3, path: "/dashboard" },
+      { id: "analytics", label: "Analytics", icon: TrendingUp, path: "/dashboard/analytics" },
+      { id: "products", label: "Products", icon: Package, path: "/dashboard/products" },
+      { id: "categories", label: "Category", icon: FolderOpen, path: "/dashboard/categories" },
+      { id: "inquiries", label: "Inquiries", icon: MessageSquare, path: "/dashboard/inquiries" },
+      { id: "orders", label: "Order", icon: ShoppingCart, path: "/dashboard/orders" }
     ]
   },
   {
-    id: "categories",
-    label: "Categories",
-    icon: FolderOpen,
-    path: "/dashboard/categories"
-  },
-  {
-    id: "products",
-    label: "Products",
-    icon: Package,
-    path: "/dashboard/products"
-  },
-  {
-    id: "email-subscriptions",
-    label: "Email Subscriptions",
-    icon: Mail,
-    path: "/dashboard/email-subscriptions"
-  },
-  {
-    id: "orders",
-    label: "Orders",
-    icon: ShoppingCart,
-    children: [
-      { id: "all-orders", label: "All Orders", icon: FileText, path: "/dashboard/orders" }
-    ]
-  },
-  {
-    id: "inquiries",
-    label: "Inquiries",
-    icon: MessageSquare,
-    path: "/dashboard/inquiries"
-  },
-  {
-    id: "customers",
-    label: "Customers",
+    id: "reseller",
+    label: "Reseller",
     icon: Users,
     children: [
-      { id: "all-customers", label: "All Customers", icon: UserCheck, path: "/dashboard/customers" },
-      { id: "reviews", label: "Reviews & Ratings", icon: Star, path: "/dashboard/reviews" }
-    ]
-  },
-  {
-    id: "sales",
-    label: "Sales",
-    icon: DollarSign,
-    children: [
-      { id: "discounts", label: "Discounts", icon: Percent, path: "/dashboard/discounts" },
-      { id: "promotions", label: "Promotions", icon: Gift, path: "/dashboard/promotions" },
-      { id: "email-marketing", label: "Email Marketing", icon: Mail, path: "/dashboard/email-marketing" },
-      { id: "email-subscriptions-sales", label: "Email Subscriptions", icon: Mail, path: "/dashboard/email-subscriptions" }
+      { id: "reseller-status", label: "Reseller Status", icon: UserCheck, path: "/dashboard/reseller-status" },
+      { id: "reseller-messages", label: "Messages", icon: MessageSquare, path: "/dashboard/reseller-messages" }
     ]
   },
   {
@@ -133,24 +88,28 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
     label: "Content",
     icon: Layers,
     children: [
-      { id: "hero-section", label: "Hero Section", icon: SliderIcon, path: "/dashboard/content/hero-section" },
+      { id: "hero-section", label: "Hero Section", icon: SlidersHorizontal, path: "/dashboard/content/hero-section" },
       { id: "testimonials", label: "Testimonials", icon: Star, path: "/dashboard/content/testimonials" },
-      { id: "services", label: "Services", icon: SliderIcon, path: "/dashboard/content/services" },
+      { id: "services", label: "Services", icon: SlidersHorizontal, path: "/dashboard/content/services" },
       { id: "videos", label: "Videos", icon: Video, path: "/dashboard/content/videos" },
-      { id: "banners", label: "Banners", icon: SliderIcon, path: "/dashboard/content/banners" },
-      { id: "about", label: "About", icon: AboutIcon, path: "/dashboard/content/about" }
+      { id: "banners", label: "Banners", icon: SlidersHorizontal, path: "/dashboard/content/banners" },
+      { id: "about", label: "About", icon: Info, path: "/dashboard/content/about" },
+      { id: "privacy-policy", label: "Privacy Policy", icon: Shield, path: "/dashboard/content/privacy-policy" },
+      { id: "faq", label: "FAQ", icon: HelpCircle, path: "/dashboard/content/faq" },
+      { id: "terms-of-use", label: "Terms of Use", icon: Gavel, path: "/dashboard/content/terms-of-use" }
     ]
   },
   {
-    id: "analytics",
-    label: "Analytics & Reports",
-    icon: BarChart3,
+    id: "other",
+    label: "Other",
+    icon: Layers,
     children: [
-      { id: "analytics", label: "Website Analytics", icon: BarChart3, path: "/dashboard/analytics" },
-      { id: "sales-analytics", label: "Sales Analytics", icon: TrendingUp, path: "/dashboard/sales-analytics" },
-      { id: "product-performance", label: "Product Performance", icon: BarChart, path: "/dashboard/product-performance" },
-      { id: "customer-analytics", label: "Customer Analytics", icon: Users, path: "/dashboard/customer-analytics" },
-      { id: "marketing-performance", label: "Marketing Performance", icon: Target, path: "/dashboard/marketing-performance" }
+      { id: "customers", label: "Customers", icon: Users, path: "/dashboard/customers" },
+      { id: "reviews", label: "Reviews & Ratings", icon: Star, path: "/dashboard/reviews" },
+      { id: "sales", label: "Sales", icon: DollarSign, path: "/dashboard/sales" },
+      { id: "discounts", label: "Discounts", icon: Percent, path: "/dashboard/discounts" },
+      { id: "promotions", label: "Promotions", icon: Gift, path: "/dashboard/promotions" },
+      { id: "email-subscriptions", label: "Email Subscriptions", icon: Mail, path: "/dashboard/email-subscriptions" }
     ]
   },
   {
@@ -166,26 +125,31 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
 ];
 
 // Create a map of routes for quick lookup
-const ROUTE_MAP = NAVIGATION_ITEMS.reduce((acc, item) => {
-  if (item.path) {
-    acc[item.id] = item.path;
-  }
-  if (item.children) {
-    item.children.forEach(child => {
-      if (child.path) {
-        acc[child.id] = child.path;
-      }
-      if (child.children) {
-        child.children.forEach(grandChild => {
-          if (grandChild.path) {
-            acc[grandChild.id] = grandChild.path;
-          }
-        });
-      }
-    });
-  }
-  return acc;
-}, {} as Record<string, string>);
+const ROUTE_MAP = (() => {
+  const map: Record<string, string> = {};
+  
+  NAVIGATION_ITEMS.forEach(item => {
+    if (item.path) {
+      map[item.id] = item.path;
+    }
+    if (item.children) {
+      item.children.forEach(child => {
+        if (child.path) {
+          map[child.id] = child.path;
+        }
+        if (child.children) {
+          child.children.forEach(grandChild => {
+            if (grandChild.path) {
+              map[grandChild.id] = grandChild.path;
+            }
+          });
+        }
+      });
+    }
+  });
+  
+  return map;
+})();
 
 export default function DashboardLayout({
   children,
@@ -193,7 +157,7 @@ export default function DashboardLayout({
   showBackButton = false,
   showBreadcrumb = true
 }: DashboardLayoutProps) {
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['main']));
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -288,9 +252,8 @@ export default function DashboardLayout({
 
   // Navigation component for better organization
   const Navigation = useMemo(() => (
-    <nav className="flex-1 overflow-y-auto px-3 py-6 scrollbar-hide" style={{
-      scrollbarWidth: 'none',
-      msOverflowStyle: 'none'
+    <nav className="flex-1 overflow-y-auto px-3 py-6 custom-scrollbar" style={{
+      maxHeight: 'calc(100vh - 8rem)' // Account for header and footer
     }}>
       <div className="space-y-1">
         {NAVIGATION_ITEMS.map((item) => {
@@ -337,7 +300,7 @@ export default function DashboardLayout({
                   <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300"></div>
 
                   {item.children!.map((child) => {
-                    const ChildIcon = child.icon;
+                    const ChildIcon = child.icon || Fragment;
                     const hasGrandChildren = !!child.children?.length;
                     const isChildExpanded = expandedSections.has(child.id);
                     const isChildActive = isNavItemActive(child.id);
@@ -412,7 +375,7 @@ export default function DashboardLayout({
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="h-screen bg-gray-50 flex overflow-hidden">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && !isDesktop && (
           <div
@@ -427,7 +390,7 @@ export default function DashboardLayout({
             ${isDesktop ? 'relative' : 'fixed inset-y-0 left-0 z-50'}
             ${isDesktop ? (isCollapsed ? 'w-16' : 'w-1/5') : (sidebarOpen ? 'w-96' : 'w-0')}
             ${isDesktop ? 'translate-x-0' : (sidebarOpen ? 'translate-x-0' : '-translate-x-full')}
-            flex-shrink-0 bg-white shadow-lg flex flex-col
+            flex-shrink-0 bg-white shadow-lg flex flex-col h-screen max-h-screen
           `}
         >
           {/* Fixed Header */}
@@ -479,7 +442,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
           {/* Top bar */}
           <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
             <div className="flex items-center justify-between h-16 px-4 sm:px-6">
@@ -572,25 +535,25 @@ export default function DashboardLayout({
             <div className="bg-white border-b border-gray-200 px-4 py-2">
               <div className="flex items-center space-x-2 overflow-x-auto">
                 <button
+                  onClick={() => handleNavigation('dashboard')}
+                  className="flex-shrink-0 px-3 py-2 font-bold text-black bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                >
+                  Dashboard
+                </button>
+                <button
                   onClick={() => handleNavigation('products')}
                   className="flex-shrink-0 px-3 py-2 font-bold text-black bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
                 >
                   Products
                 </button>
                 <button
-                  onClick={() => handleNavigation('all-orders')}
+                  onClick={() => handleNavigation('orders')}
                   className="flex-shrink-0 px-3 py-2 font-bold text-black bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
                 >
                   Orders
                 </button>
                 <button
-                  onClick={() => handleNavigation('all-customers')}
-                  className="flex-shrink-0 px-3 py-2 font-bold text-black bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
-                >
-                  Customers
-                </button>
-                <button
-                  onClick={() => handleNavigation('sales-analytics')}
+                  onClick={() => handleNavigation('analytics')}
                   className="flex-shrink-0 px-3 py-2 font-bold text-black bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
                 >
                   Analytics
@@ -600,7 +563,9 @@ export default function DashboardLayout({
           )}
 
           {/* Page content */}
-          <main className="flex-1 p-4 sm:p-6 overflow-auto">
+          <main className="flex-1 p-4 sm:p-6 overflow-y-auto custom-scrollbar" style={{
+            maxHeight: 'calc(100vh - 4rem)' // Account for top bar height
+          }}>
             <div className="max-w-7xl mx-auto">
               {children}
             </div>

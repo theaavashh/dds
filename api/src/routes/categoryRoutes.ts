@@ -18,7 +18,6 @@ import { authMiddleware } from '../middleware/authMiddleware';
 import upload from '../middleware/upload';
 import { validateRequest } from '../middleware/validationMiddleware';
 import {
-  categorySchema,
   subcategorySchema,
   createCategoryWithSubcategoriesSchema,
   updateCategorySchema

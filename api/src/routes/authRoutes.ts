@@ -452,7 +452,7 @@ router.get('/me', async (req: Request, res: Response<ApiResponse<Partial<Admin>>
 });
 
 // Logout endpoint
-router.post('/logout', async (req: Request, res: Response<ApiResponse<{ message: string }>>) => {
+router.post('/logout', async (_req: Request, res: Response<ApiResponse<{ message: string }>>) => {
   try {
     // Clear the auth cookie with enhanced security settings
     const isProduction = process.env['NODE_ENV'] === 'production';

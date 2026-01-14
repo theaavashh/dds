@@ -17,7 +17,7 @@ const router = express.Router();
 router.post('/login', loginDistributor);
 
 // Distributor logout
-router.post('/logout', async (req, res) => {
+router.post('/logout', async (_req, res) => {
   try {
     // Clear the auth cookie with enhanced security settings
     const isProduction = process.env['NODE_ENV'] === 'production';

@@ -17,7 +17,7 @@ import {
     Legend
 } from 'recharts';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4'];
 
 interface CategoryData {
     name: string;
@@ -55,7 +55,7 @@ export const CategoryBarChart = ({ data }: CategoryBarChartProps) => {
                     <Tooltip
                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     />
-                    <Bar dataKey="count" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
                 </BarChart>
             </ResponsiveContainer>
         </div>
@@ -125,7 +125,7 @@ export const GrowthLineChart = ({ data, label }: GrowthLineChartProps) => {
                     <Tooltip
                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                     />
-                    <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={3} activeDot={{ r: 8 }} />
+                    <Line type="monotone" dataKey="value" stroke="#8b5cf6" strokeWidth={3} activeDot={{ r: 8 }} />
                 </LineChart>
             </ResponsiveContainer>
         </div>

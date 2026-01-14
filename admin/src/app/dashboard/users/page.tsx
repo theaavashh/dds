@@ -223,7 +223,7 @@ export default function UsersPage() {
     setShowForm(false);
   };
 
-  const filteredAdmins = admins.filter((admin) => {
+  const filteredAdmins = Array.isArray(admins) ? admins.filter((admin) => {
     const matchesSearch =
       admin.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
       admin.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -236,7 +236,7 @@ export default function UsersPage() {
         : !admin.isActive;
 
     return matchesSearch && matchesFilter;
-  });
+  }) : [];
 
   return (
     <DashboardLayout title="User Configuration" showBackButton={false} showBreadcrumb={true}>

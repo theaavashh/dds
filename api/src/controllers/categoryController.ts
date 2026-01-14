@@ -23,7 +23,7 @@ interface CategoryWithSubcategories extends PrismaCategory {
 }
 
 // Get all categories (public)
-export const getAllCategories = async (req: Request<{}, ApiResponse<PrismaCategory[]>>, res: Response<ApiResponse<PrismaCategory[]>>) => {
+export const getAllCategories = async (_req: Request<{}, ApiResponse<PrismaCategory[]>>, res: Response<ApiResponse<PrismaCategory[]>>) => {
   try {
     // @ts-ignore - Prisma client needs to be regenerated after schema update
     const categories = await prisma.category.findMany({
@@ -47,7 +47,7 @@ export const getAllCategories = async (req: Request<{}, ApiResponse<PrismaCatego
 };
 
 // Get all categories with subcategories (admin)
-export const getAdminCategories = async (req: Request<{}, ApiResponse<CategoryWithSubcategories[]>>, res: Response<ApiResponse<CategoryWithSubcategories[]>>) => {
+export const getAdminCategories = async (_req: Request<{}, ApiResponse<CategoryWithSubcategories[]>>, res: Response<ApiResponse<CategoryWithSubcategories[]>>) => {
   try {
     // @ts-ignore - Prisma client needs to be regenerated after schema update
     const categories = await prisma.category.findMany({

@@ -11,7 +11,7 @@ import {
   getProductCategories
 } from '../controllers/productController';
 import { authMiddleware } from '../middleware/authMiddleware';
-import { uploadHeroImage, uploadProductImages, uploadMixedFiles } from '../middleware/upload';
+import { uploadMixedFiles } from '../middleware/upload';
 
 const router = express.Router();
 
