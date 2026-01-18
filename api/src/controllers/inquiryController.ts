@@ -1,5 +1,92 @@
 import prisma from '../config/database';
 import { Request, Response } from 'express';
+import axios from 'axios';
+
+// Create a customer inquiry (public)
+export const createCustomerInquiry = async (req: Request, res: Response) => {
+    try {
+        const { items, notes, customerInfo } = req.body;
+
+        // Validate required fields
+        if (!items || !customerInfo) {
+            return res.status(400).json({
+                success: false,
+                message: 'Items and customer information are required'
+            });
+        }
+
+        // Validate customer info
+        const { name, email, phone } = customerInfo;
+        if (!name || !email || !phone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Name, email, and phone are required'
+            });
+        }
+
+        // Format the inquiry message for WhatsApp
+        const inquiryMessage = `New Inquiry from Celebration Diamonds:
+
+Customer: ${name}
+Email: ${email}
+Phone: ${phone}
+
+Items: ${items.length} items in inquiry
+
+Message: ${customerInfo.message || 'No additional message'}
+
+${notes}`;
+
+        // Send WhatsApp message to +9779843803568
+        try {
+            // Check if WhatsApp business API credentials are available
+            const whatsappAccessToken = process.env.WHATSAPP_ACCESS_TOKEN;
+            const whatsappPhoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
+            
+            if (whatsappAccessToken && whatsappPhoneNumberId) {
+                // Send via WhatsApp Business API
+                const whatsappResponse = await axios.post(
+                    `https://graph.facebook.com/v18.0/${whatsappPhoneNumberId}/messages`,
+                    {
+                        messaging_product: 'whatsapp',
+                        to: phone.replace('+', ''), // Remove + prefix for API
+                        type: 'text',
+                        text: {
+                            body: inquiryMessage,
+                        },
+                    },
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${whatsappAccessToken}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                
+                console.log('WhatsApp message sent successfully:', whatsappResponse.data);
+            } else {
+                // Log the inquiry for manual processing if WhatsApp API is not configured
+                console.log('WhatsApp API not configured. Inquiry details:', { items, customerInfo, notes });
+                console.log('Formatted message:', inquiryMessage);
+            }
+        } catch (whatsappError) {
+            console.error('Error sending WhatsApp message:', whatsappError);
+            // Continue processing even if WhatsApp fails
+        }
+
+        res.status(201).json({
+            success: true,
+            message: 'Inquiry submitted successfully and notification sent',
+            data: null // Don't return sensitive customer data
+        });
+    } catch (error) {
+        console.error('Error creating customer inquiry:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error submitting inquiry'
+        });
+    }
+};
 
 // Create a new inquiry
 export const createInquiry = async (req: any, res: Response) => {

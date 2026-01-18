@@ -28,14 +28,14 @@ function toTitleCase(str: string): string {
 
 // Function to extract category from folder name
 function extractCategory(folderName: string): string {
-  // Convert folder name to TitleCase and remove all spaces/special characters
-  // e.g., "ladies rings" or "ladies-ring" -> "LadiesRing"
+  // Convert folder name to TitleCase but preserve spaces
+  // e.g., "ladies rings" or "ladies-ring" -> "Ladies Rings"
   const cleanName = folderName
     .replace(/[-_]/g, ' ')
     .trim();
-
-  const titleCased = toTitleCase(cleanName);
-  return titleCased.replace(/\s+/g, '');
+  
+  return toTitleCase(cleanName);
+  // Return title cased name with spaces preserved instead of removing them
 }
 
 // Function to extract subcategory from folder name

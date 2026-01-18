@@ -5,6 +5,9 @@ import { distributorAuthMiddleware } from '../middleware/distributorAuthMiddlewa
 
 const router = Router();
 
+// Public routes for customer inquiries
+router.post('/customer', inquiryController.createCustomerInquiry);
+
 // Distributor routes
 router.post('/', distributorAuthMiddleware, inquiryController.createInquiry);
 router.get('/my-inquiries', distributorAuthMiddleware, inquiryController.getCustomerInquiries);

@@ -40,12 +40,12 @@ export const createHeroSection = async (req: Request, res: Response) => {
     // Handle desktop and mobile images
     let desktopImageValue = desktopImageUrl;
     if (files?.['desktopImage']?.[0]) {
-      desktopImageValue = `/uploads/hero-section/${files['desktopImage'][0].filename}`;
+      desktopImageValue = `/uploads/hero/${files['desktopImage'][0].filename}`;
     }
 
     let mobileImageValue = mobileImageUrl;
     if (files?.['mobileImage']?.[0]) {
-      mobileImageValue = `/uploads/hero-section/${files['mobileImage'][0].filename}`;
+      mobileImageValue = `/uploads/hero/${files['mobileImage'][0].filename}`;
     }
 
     const heroSection = await prisma.heroSection.create({
@@ -77,12 +77,12 @@ export const updateHeroSection = async (req: Request, res: Response) => {
     // Handle desktop and mobile images
     let desktopImageValue = desktopImageUrl;
     if (files?.['desktopImage']?.[0]) {
-      desktopImageValue = `/uploads/hero-section/${files['desktopImage'][0].filename}`;
+      desktopImageValue = `/uploads/hero/${files['desktopImage'][0].filename}`;
     }
 
     let mobileImageValue = mobileImageUrl;
     if (files?.['mobileImage']?.[0]) {
-      mobileImageValue = `/uploads/hero-section/${files['mobileImage'][0].filename}`;
+      mobileImageValue = `/uploads/hero/${files['mobileImage'][0].filename}`;
     }
 
     const heroSection = await prisma.heroSection.update({

@@ -25,13 +25,17 @@ import settingsRoutes from './routes/settingsRoutes';
 import heroSectionRoutes from './routes/heroSectionRoutes';
 import newsletterRoutes from './routes/newsletterRoutes';
 import testimonialRoutes from './routes/testimonialRoutes';
+import catalogRoutes from './routes/catalogRoutes'; // Add this line
 import serviceRoutes from './routes/serviceRoutes';
 import videoRoutes from './routes/videoRoutes';
 import bannerRoutes from './routes/bannerRoutes';
+import lowerBannerRoutes from './routes/lowerBannerRoutes';
 import aboutRoutes from './routes/aboutRoutes';
 import distributorRoutes from './routes/distributorRoutes';
 import inquiryRoutes from './routes/inquiryRoutes';
 import jewelryShowcaseRoutes from './routes/jewelryShowcaseRoutes';
+import privacyPolicyRoutes from './routes/privacyPolicyRoutes';
+import termsOfUseRoutes from './routes/termsOfUseRoutes';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -142,12 +146,16 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/hero-section', heroSectionRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/testimonials', testimonialRoutes);
+app.use('/api/catalog', catalogRoutes); // Add this line
 app.use('/api/services', serviceRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/banners', bannerRoutes);
+app.use('/api/lower-banners', lowerBannerRoutes);
 app.use('/api/about', aboutRoutes);
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/api/jewelry-showcase', jewelryShowcaseRoutes);
+app.use('/api/privacy-policy', privacyPolicyRoutes);
+app.use('/api/terms-of-use', termsOfUseRoutes);
 
 // Add category routes
 app.use('/api/categories', categoryRoutes);

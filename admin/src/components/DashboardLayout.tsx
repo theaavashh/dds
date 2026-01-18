@@ -89,10 +89,12 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
     icon: Layers,
     children: [
       { id: "hero-section", label: "Hero Section", icon: SlidersHorizontal, path: "/dashboard/content/hero-section" },
+      { id: "catalog", label: "Catalog", icon: Package, path: "/dashboard/content/catalog" },
       { id: "testimonials", label: "Testimonials", icon: Star, path: "/dashboard/content/testimonials" },
       { id: "services", label: "Services", icon: SlidersHorizontal, path: "/dashboard/content/services" },
       { id: "videos", label: "Videos", icon: Video, path: "/dashboard/content/videos" },
       { id: "banners", label: "Banners", icon: SlidersHorizontal, path: "/dashboard/content/banners" },
+      { id: "lower-banner", label: "Lower Banner", icon: SlidersHorizontal, path: "/dashboard/content/lower-banner" },
       { id: "about", label: "About", icon: Info, path: "/dashboard/content/about" },
       { id: "privacy-policy", label: "Privacy Policy", icon: Shield, path: "/dashboard/content/privacy-policy" },
       { id: "faq", label: "FAQ", icon: HelpCircle, path: "/dashboard/content/faq" },

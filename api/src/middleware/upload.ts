@@ -24,8 +24,8 @@ const storage = multer.diskStorage({
 
     } else if (fieldName === 'image' && (req.path.includes('/hero') || req.originalUrl.includes('/hero'))) {
       destination = 'uploads/hero/';
-    } else if ((fieldName === 'leftImage' || fieldName === 'rightImage' || fieldName === 'leftBgImage' || fieldName === 'rightBgImage') && (req.path.includes('/hero-section') || req.originalUrl.includes('/hero-section'))) {
-      destination = 'uploads/hero-section/';
+    } else if ((fieldName === 'leftImage' || fieldName === 'rightImage' || fieldName === 'leftBgImage' || fieldName === 'rightBgImage' || fieldName === 'desktopImage' || fieldName === 'mobileImage') && (req.path.includes('/hero-section') || req.originalUrl.includes('/hero-section'))) {
+      destination = 'uploads/hero/';
     } else if (fieldName === 'images' && (req.path.includes('/products') || req.originalUrl.includes('/products'))) {
       destination = 'uploads/products/';
     } else if (fieldName === 'image' && (req.path.includes('/mid-banners') || req.originalUrl.includes('/mid-banners'))) {

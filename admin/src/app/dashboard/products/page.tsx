@@ -529,7 +529,14 @@ function ProductsContent() {
       products = products.filter(p => p.category === advancedFilters.categoryId);
     }
 
-    if (advancedFilters.isActive !== undefined) {
+    // Apply status filter based on selectedStatus
+    if (selectedStatus === 'active') {
+      products = products.filter(p => p.status === 'active');
+    } else if (selectedStatus === 'draft') {
+      products = products.filter(p => p.status === 'draft');
+    } else if (selectedStatus === 'inactive') {
+      products = products.filter(p => p.status === 'inactive');
+    } else if (advancedFilters.isActive !== undefined) {
       const wantActive = advancedFilters.isActive;
       products = products.filter(p => (p.status === 'active') === wantActive);
     }
@@ -1175,21 +1182,40 @@ function ProductsContent() {
                     ))}
                   </select>
 
-                  {/* Status Filter */}
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => {
-                      setSelectedStatus(e.target.value);
-                      const status = e.target.value === 'all' ? undefined : e.target.value === 'active';
-                      setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: status }));
-                    }}
-                    className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#DFC97E] focus:border-[#B8956A] text-gray-900 bg-white"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="draft">Draft</option>
-                  </select>
+                  {/* Status Filter - Show appropriate indicator based on selected status */}
+                  {selectedStatus === 'all' && (
+                    <select
+                      value="all"
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSelectedStatus(value);
+                        const status = value === 'all' ? undefined : value === 'active';
+                        setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: status }));
+                        setCurrentPage(1);
+                      }}
+                      className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#DFC97E] focus:border-[#B8956A] text-gray-900 bg-white"
+                    >
+                      <option value="all">All Status</option>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="draft">Draft</option>
+                    </select>
+                  )}
+                  {selectedStatus === 'active' && (
+                    <div className="px-4 py-3 rounded-lg border border-gray-300 bg-[#9A8873] text-white">
+                      Active Products
+                    </div>
+                  )}
+                  {selectedStatus === 'draft' && (
+                    <div className="px-4 py-3 rounded-lg border border-gray-300 bg-[#9A8873] text-white">
+                      Draft Products
+                    </div>
+                  )}
+                  {selectedStatus === 'inactive' && (
+                    <div className="px-4 py-3 rounded-lg border border-gray-300 bg-[#9A8873] text-white">
+                      Inactive Products
+                    </div>
+                  )}
 
                   {/* Advanced Filter Button */}
                   <button
@@ -1212,21 +1238,29 @@ function ProductsContent() {
                   setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: undefined }));
                   setCurrentPage(1);
                 }}
-                className={`px-0 py-0 text-base font-medium ${selectedStatus === 'all' ? 'text-[#9A8873]' : 'text-black hover:text-[#9A8873]'
-                  }`}
+                className={`px-4 py-2 rounded-lg text-base font-medium ${selectedStatus === 'all' ? 'bg-[#9A8873] text-white' : 'text-black hover:text-[#9A8873] bg-gray-100'}`}
               >
-                Products
+                All Products
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedStatus('active');
+                  setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: true }));
+                  setCurrentPage(1);
+                }}
+                className={`px-4 py-2 rounded-lg text-base font-medium ${selectedStatus === 'active' ? 'bg-[#9A8873] text-white' : 'text-black hover:text-[#9A8873] bg-gray-100'}`}
+              >
+                Active Products
               </button>
               <button
                 onClick={() => {
                   setSelectedStatus('draft');
-                  setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: undefined }));
+                  setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: false }));
                   setCurrentPage(1);
                 }}
-                className={`px-0 py-0 text-base font-medium ${selectedStatus === 'draft' ? 'text-[#9A8873]' : 'text-black hover:text-[#9A8873]'
-                  }`}
+                className={`px-4 py-2 rounded-lg text-base font-medium ${selectedStatus === 'draft' ? 'bg-[#9A8873] text-white' : 'text-black hover:text-[#9A8873] bg-gray-100'}`}
               >
-                Product Draft
+                Draft Products
               </button>
             </div>
             <div className="relative ml-auto">

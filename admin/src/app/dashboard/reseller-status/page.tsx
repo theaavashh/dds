@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, TrendingUp, Package, DollarSign, Star, MessageCircle, Clock, CheckCircle, XCircle, AlertCircle, BarChart3, Activity } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { distributorApi, type DistributorStats, type Distributor } from '@/lib/distributorApi';
 
 interface ResellerStats {
   totalResellers: number;
@@ -26,118 +27,126 @@ interface ResellerStats {
     phone: string;
     businessName: string;
     appliedAt: string;
-    status: 'pending' | 'approved' | 'rejected';
+    status: 'pending' | 'approved' | 'rejected' | 'blocked';
     documents: string[];
   }>;
 }
 
+// Helper function to map distributor data to reseller interface
+const mapDistributorToResellerStats = (distributorStats: DistributorStats): ResellerStats => {
+  return {
+    totalResellers: distributorStats.totalDistributors,
+    activeResellers: distributorStats.activeDistributors,
+    pendingApplications: distributorStats.pendingApplications,
+    thisMonthNewResellers: distributorStats.thisMonthNewDistributors,
+    topPerformers: distributorStats.topPerformers.map(distributor => ({
+      id: distributor.id,
+      name: `${distributor.firstName} ${distributor.lastName}`,
+      email: distributor.email,
+      sales: distributor.totalRevenue,
+      commission: (distributor as any).commission || Math.round(distributor.totalRevenue * 0.25),
+      joinDate: distributor.registrationDate,
+      status: distributor.status === 'approved' ? 'active' : 
+              distributor.status === 'blocked' ? 'inactive' : 
+              distributor.status as 'active' | 'inactive' | 'pending'
+    })),
+    recentApplications: distributorStats.recentApplications.map(distributor => ({
+      id: distributor.id,
+      name: `${distributor.firstName} ${distributor.lastName}`,
+      email: distributor.email,
+      phone: distributor.phone,
+      businessName: distributor.companyName,
+      appliedAt: distributor.registrationDate,
+      status: distributor.status,
+      documents: (distributor as any).documents || ['Business License', 'Address Proof', 'ID Proof']
+    }))
+  };
+};
+
 export default function ResellerStatusPage() {
   const [stats, setStats] = useState<ResellerStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'active' | 'inactive' | 'pending'>('all');
 
-  // Hardcoded reseller data
-  const hardcodedStats: ResellerStats = {
-    totalResellers: 156,
-    activeResellers: 134,
-    pendingApplications: 8,
-    thisMonthNewResellers: 23,
-    topPerformers: [
-      {
-        id: '1',
-        name: 'Rajesh Kumar',
-        email: 'rajesh.kumar@example.com',
-        sales: 897650,
-        commission: 224412,
-        joinDate: '2023-01-15',
-        status: 'active'
-      },
-      {
-        id: '2',
-        name: 'Priya Sharma',
-        email: 'priya.sharma@example.com',
-        sales: 756320,
-        commission: 189080,
-        joinDate: '2023-02-20',
-        status: 'active'
-      },
-      {
-        id: '3',
-        name: 'Amit Patel',
-        email: 'amit.patel@example.com',
-        sales: 645890,
-        commission: 161472,
-        joinDate: '2023-03-10',
-        status: 'active'
-      },
-      {
-        id: '4',
-        name: 'Sunita Devi',
-        email: 'sunita.devi@example.com',
-        sales: 523100,
-        commission: 130775,
-        joinDate: '2023-04-05',
-        status: 'active'
-      },
-      {
-        id: '5',
-        name: 'Mohan Singh',
-        email: 'mohan.singh@example.com',
-        sales: 412560,
-        commission: 103140,
-        joinDate: '2023-05-12',
-        status: 'active'
+  useEffect(() => {
+    fetchResellerStats();
+  }, []);
+
+  const fetchResellerStats = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await distributorApi.getDistributorStats();
+      
+      if (response.success && response.data) {
+        const mappedStats = mapDistributorToResellerStats(response.data);
+        setStats(mappedStats);
+      } else {
+        setError(response.message || 'Failed to fetch reseller statistics');
+        // Fallback to empty stats
+        setStats({
+          totalResellers: 0,
+          activeResellers: 0,
+          pendingApplications: 0,
+          thisMonthNewResellers: 0,
+          topPerformers: [],
+          recentApplications: []
+        });
       }
-    ],
-    recentApplications: [
-      {
-        id: '1',
-        name: 'Sanjay Verma',
-        email: 'sanjay.verma@example.com',
-        phone: '+91 9876543210',
-        businessName: 'Verma Jewels',
-        appliedAt: '2024-01-14T10:30:00Z',
-        status: 'pending',
-        documents: ['Business License', 'Address Proof', 'ID Proof']
-      },
-      {
-        id: '2',
-        name: 'Anita Gupta',
-        email: 'anita.gupta@example.com',
-        phone: '+91 9876543211',
-        businessName: 'Gupta Collections',
-        appliedAt: '2024-01-13T14:45:00Z',
-        status: 'approved',
-        documents: ['Business License', 'PAN Card', 'Bank Statement']
-      },
-      {
-        id: '3',
-        name: 'Vikram Reddy',
-        email: 'vikram.reddy@example.com',
-        phone: '+91 9876543212',
-        businessName: 'Reddy Gems',
-        appliedAt: '2024-01-12T09:20:00Z',
-        status: 'pending',
-        documents: ['Business License', 'GST Certificate']
-      },
-      {
-        id: '4',
-        name: 'Kavita Malhotra',
-        email: 'kavita.malhotra@example.com',
-        phone: '+91 9876543213',
-        businessName: 'Malhotra Jewellers',
-        appliedAt: '2024-01-11T16:15:00Z',
-        status: 'rejected',
-        documents: ['Business License']
-      }
-    ]
+    } catch (err) {
+      console.error('Error fetching reseller stats:', err);
+      setError('An error occurred while fetching reseller statistics');
+      // Fallback to empty stats
+      setStats({
+        totalResellers: 0,
+        activeResellers: 0,
+        pendingApplications: 0,
+        thisMonthNewResellers: 0,
+        topPerformers: [],
+        recentApplications: []
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => {
-    // Use hardcoded data
-    setStats(hardcodedStats);
-    setLoading(false);
-  }, []);
+  const handleApproveApplication = async (applicationId: string) => {
+    try {
+      const response = await distributorApi.approveDistributor(applicationId);
+      
+      if (response.success) {
+        // Refresh the stats to show updated data
+        await fetchResellerStats();
+        // You could also show a success toast here
+      } else {
+        console.error('Failed to approve application:', response.message);
+        // You could show an error toast here
+      }
+    } catch (err) {
+      console.error('Error approving application:', err);
+      // You could show an error toast here
+    }
+  };
+
+  const handleRejectApplication = async (applicationId: string) => {
+    try {
+      const response = await distributorApi.rejectDistributor(applicationId);
+      
+      if (response.success) {
+        // Refresh the stats to show updated data
+        await fetchResellerStats();
+        // You could also show a success toast here
+      } else {
+        console.error('Failed to reject application:', response.message);
+        // You could show an error toast here
+      }
+    } catch (err) {
+      console.error('Error rejecting application:', err);
+      // You could show an error toast here
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -182,14 +191,56 @@ export default function ResellerStatusPage() {
     );
   }
 
+  if (error && !stats) {
+    return (
+      <ProtectedRoute>
+        <DashboardLayout showBreadcrumb={true}>
+          <div className="flex flex-col items-center justify-center h-64">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <p className="text-red-600 font-medium mb-2">Error loading reseller status</p>
+            <p className="text-gray-600 text-sm mb-4">{error}</p>
+            <button 
+              onClick={fetchResellerStats}
+              className="px-4 py-2 bg-[#DFC97E] text-black rounded-lg hover:bg-[#C7A862] transition-colors font-medium"
+            >
+              Try Again
+            </button>
+          </div>
+        </DashboardLayout>
+      </ProtectedRoute>
+    );
+  }
+
   return (
     <ProtectedRoute>
       <DashboardLayout showBreadcrumb={true}>
         <div className="p-6">
+          {/* Error Notification */}
+          {error && stats && (
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-3">
+              <AlertCircle className="w-5 h-5 text-yellow-600" />
+              <div>
+                <p className="text-yellow-800 font-medium">Warning</p>
+                <p className="text-yellow-600 text-sm">{error}</p>
+              </div>
+            </div>
+          )}
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-black mb-2">Reseller Status</h1>
-            <p className="text-gray-600">Manage and monitor your reseller network</p>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-black mb-2">Reseller Status</h1>
+              <p className="text-gray-600">Manage and monitor your reseller network</p>
+            </div>
+            <button 
+              onClick={fetchResellerStats}
+              disabled={loading}
+              className="px-4 py-2 bg-[#DFC97E] text-black rounded-lg hover:bg-[#C7A862] transition-colors font-medium flex items-center gap-2 disabled:opacity-50"
+            >
+              <Activity className="w-4 h-4" />
+              Refresh
+            </button>
           </div>
 
           {/* Overview Cards */}
@@ -296,10 +347,16 @@ export default function ResellerStatusPage() {
                         <div className="flex gap-2 ml-4">
                           {application.status === 'pending' && (
                             <>
-                              <button className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                              <button 
+                                onClick={() => handleApproveApplication(application.id)}
+                                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                              >
                                 Approve
                               </button>
-                              <button className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
+                              <button 
+                                onClick={() => handleRejectApplication(application.id)}
+                                className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                              >
                                 Reject
                               </button>
                             </>

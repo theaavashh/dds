@@ -337,15 +337,166 @@ model Banner {
 
 model AboutPage {
   id         String   @id @default(cuid())
-  title      String
-  description String
-  ctaLink    String?
-  ctaTitle   String?
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
+  // Relations
+  heroSection        AboutHeroSection?
+  heritageSection    AboutHeritageSection?
+  beyondSparkle      AboutBeyondSparkle?
+  celebrations       AboutCelebrations?
+  gemologist         AboutGemologist?
+  knowledge          AboutKnowledge?
+  promise            AboutPromise?
+  brandPromise       AboutBrandPromise?
+
   @@map("about_pages")
+}
+
+model AboutHeroSection {
+  id          String   @id @default(cuid())
+  aboutPageId String   @unique
+  title       String
+  subtitle    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+
+  @@map("about_hero_sections")
+}
+
+model AboutHeritageSection {
+  id          String   @id @default(cuid())
+  aboutPageId String   @unique
+  title       String
+  content     String   // JSON array of paragraphs
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+
+  @@map("about_heritage_sections")
+}
+
+model AboutBeyondSparkle {
+  id          String   @id @default(cuid())
+  aboutPageId String   @unique
+  title       String
+  subtitle    String
+  items       String   // JSON array of {title, description, icon}
+  footerText  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+
+  @@map("about_beyond_sparkles")
+}
+
+model AboutCelebrations {
+  id          String   @id @default(cuid())
+  aboutPageId String   @unique
+  title       String
+  content     String   // JSON array of paragraphs
+  collections String   // JSON array of collection names
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+
+  @@map("about_celebrations")
+}
+
+model AboutGemologist {
+  id          String   @id @default(cuid())
+  aboutPageId String   @unique
+  name        String
+  title       String
+  company     String
+  expertise   String   // JSON array of expertise points
+  messageTitle String
+  message     String   // JSON array of message paragraphs
+  signature   String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+
+  @@map("about_gemologists")
+}
+
+model AboutKnowledge {
+  id          String   @id @default(cuid())
+  aboutPageId String   @unique
+  title       String
+  subtitle    String
+  content     String   // JSON array of paragraphs
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+
+  @@map("about_knowledge")
+}
+
+model AboutPromise {
+  id          String   @id @default(cuid())
+  aboutPageId String   @unique
+  title       String
+  promises    String   // JSON array of promise strings
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+
+  @@map("about_promises")
+}
+
+model AboutBrandPromise {
+  id          String   @id @default(cuid())
+  aboutPageId String   @unique
+  brandName   String
+  tagline     String
+  buttonText  String
+  buttonLink  String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
+
+  @@map("about_brand_promises")
+}
+
+model PrivacyPolicy {
+  id         String   @id @default(cuid())
+  title      String
+  content    String   // HTML content
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("privacy_policies")
+}
+
+model TermsOfUse {
+  id         String   @id @default(cuid())
+  title      String
+  content    String   // HTML content
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("terms_of_use")
 }
 
 model Distributor {
@@ -398,4 +549,38 @@ model InquiryItem {
   price       Float? // Price at the time of inquiry (if known)
 
   @@map("inquiry_items")
+}
+
+model CatalogItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  image1Url   String?
+  image2Url   String?
+  image3Url   String?
+  image4Url   String?
+  image1Title String?
+  image1Link  String?
+  image2Title String?
+  image2Link  String?
+  image3Title String?
+  image3Link  String?
+  image4Title String?
+  image4Link  String?
+  position    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("catalog_items")
+}
+
+model LowerBanner {
+  id        String   @id @default(cuid())
+  position  Int      @unique // 1 for left banner, 2 for right banner
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("lower_banners")
 }

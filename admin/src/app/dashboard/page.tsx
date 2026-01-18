@@ -49,6 +49,8 @@ import RichTextEditor from "@/components/RichTextEditor";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Toaster } from "react-hot-toast";
 import { fetchCsrfToken, getCsrfToken } from "@/lib/csrfClient";
+import TopBannerManagement from '@/components/TopBannerManagement';
+import CatalogManagement from '@/components/CatalogManagement';
 
 type SectionTitleProps = { children: React.ReactNode; className?: string };
 const SectionTitle = ({ children, className }: SectionTitleProps) => (
@@ -807,123 +809,9 @@ function DashboardContent() {
           </div>
         );
       case "top-banner":
-        return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <SectionTitle>Top Banner Management</SectionTitle>
-              <button
-                onClick={openModal}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Add Banner
-              </button>
-            </div>
-
-            {isLoadingBanners ? (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div className="p-6">
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="text-gray-500 mt-2">Loading banners...</p>
-                  </div>
-                </div>
-              </div>
-            ) : banners.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-                <div className="p-6">
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <ImageIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-xl font-medium text-gray-900 mb-2">No banners created yet</h3>
-                    <p className="text-gray-500 mb-4">Create your first promotional banner to get started.</p>
-                    <button
-                      onClick={openModal}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                    >
-                      Create Banner
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {banners.map((banner: any) => (
-                  <div key={banner.id} className="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200">
-                    <div className="p-6">
-                      {/* Banner Content */}
-                      <div className="mb-4">
-                        <div
-                          className="text-lg font-semibold text-gray-900 mb-3 line-clamp-3"
-                          dangerouslySetInnerHTML={{ __html: banner.title }}
-                        />
-                      </div>
-
-                      {/* Status and Date */}
-                      <div className="flex items-center justify-between mb-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${banner.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {banner.isActive ? 'Active' : 'Inactive'}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {new Date(banner.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex items-center gap-2 pt-4 border-t border-gray-100">
-                        <button
-                          onClick={() => toggleBannerStatus(banner.id, banner.isActive)}
-                          className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors duration-200 flex items-center justify-center gap-1 ${banner.isActive
-                            ? 'text-orange-600 bg-orange-50 hover:bg-orange-100'
-                            : 'text-green-600 bg-green-50 hover:bg-green-100'
-                            }`}
-                        >
-                          {banner.isActive ? (
-                            <>
-                              <Clock className="w-3 h-3" />
-                              Deactivate
-                            </>
-                          ) : (
-                            <>
-                              <Star className="w-3 h-3" />
-                              Activate
-                            </>
-                          )}
-                        </button>
-                        <button
-                          onClick={() => openEditModal(banner)}
-                          className="flex-1 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200 flex items-center justify-center gap-2"
-                        >
-                          <Package className="w-4 h-4" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => openDeleteConfirm(banner)}
-                          className="flex-1 px-4 py-2 text-sm font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors duration-200 flex items-center justify-center gap-2"
-                        >
-                          <XCircle className="w-4 h-4" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      case "sliders":
-        return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Sliders Management</h2>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-              <div className="p-6">
-                <p className="text-gray-500">Manage homepage sliders and banners here...</p>
-              </div>
-            </div>
-          </div>
-        );
+        return <TopBannerManagement />;
+      case "catalog": // Add this case
+        return <CatalogManagement />;
       case "articles":
         return (
           <div className="space-y-6">

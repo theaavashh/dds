@@ -333,6 +333,8 @@ export default function ProductForm({ isOpen, onClose, editingProduct, onSuccess
       digitalBrowser: true,
       website: true,
       distributor: true,
+      normalUser: false,
+      resellerUser: false,
       culture: '',
       seoTitle: '',
       seoDescription: '',
