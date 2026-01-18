@@ -26,23 +26,20 @@ export default function Home() {
         <Header />
         <Hero />
         <FeaturedProjects />
-        <ProjectGallery />
         <WhoWeAre />
         <ShopByCategory />
         <LowerBanner />
-        <ClientWork />
+        {/* <ClientWork /> */}
         <CollectionGrid />
 
-        <StyleStatement />
+        {/* <StyleStatement /> */}
+         <VideoDisplayAutoPlay />
 
       
         <DharmaAdvantages />
         <TopBanner />
 
-        <VideoDisplayAutoPlay />
-        <CustomerReviews />
-
-
+        {/* <CustomerReviews /> */}
         <Newsletter />
         <Footer />
       </main>

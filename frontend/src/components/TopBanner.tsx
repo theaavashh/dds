@@ -8,7 +8,7 @@ const TopBanner = () => {
         src="/Minimalist Bracelet Display.png"
         alt="Minimalist Bracelet Display"
         width={1920}
-        height={400}
+        height={30}
         className="w-full h-auto object-cover"
         priority
       />

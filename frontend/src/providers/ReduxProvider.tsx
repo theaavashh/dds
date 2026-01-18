@@ -13,26 +13,15 @@ import { setCart } from '../store/cartSlice';
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useDispatch();
-  const { checkAuthStatus } = useAuth();
+  useAuth(); // This will handle the auth check internally
   const initialized = useRef(false);
 
   useEffect(() => {
-    const init = async () => {
+    const init = () => {
       if (initialized.current) return;
       initialized.current = true;
 
-      // 1. Rehydrate from localStorage on mount (client-only)
-      const stored = localStorage.getItem('distributor');
-      if (stored) {
-        try {
-          const user = JSON.parse(stored);
-          dispatch(setUser(user));
-        } catch (e) {
-          console.error('Failed to parse stored user:', e);
-          localStorage.removeItem('distributor');
-        }
-      }
-
+      // Rehydrate from localStorage on mount (client-only)
       const storedWishlist = localStorage.getItem('wishlist');
       if (storedWishlist) {
         try {
@@ -54,13 +43,10 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
           localStorage.removeItem('cart');
         }
       }
-
-      // 2. Perform one-time server-side session verification
-      await checkAuthStatus();
     };
 
     init();
-  }, [dispatch, checkAuthStatus]);
+  }, [dispatch]);
 
   return <>{children}</>;
 }

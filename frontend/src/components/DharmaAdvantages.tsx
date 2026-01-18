@@ -33,10 +33,10 @@ export default function DharmaAdvantages() {
 
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-black mb-4 uppercase cabinet">
+          <h2 className="text-2xl  font-bold text-black mb-4 uppercase tan-agean">
             Celebration Diamonds Advantage
           </h2>
-          <p className="text-lg md:text-xl  text-gray-500 uppercase font-medium">
+          <p className="text-lg md:text-xl  text-gray-500 uppercase font-normal">
             Reason to shop with us!
           </p>
         </div>
@@ -52,7 +52,7 @@ export default function DharmaAdvantages() {
               viewport={{ once: true }}
               className="flex flex-col items-center group"
             >
-              <div className="mb-6 p-4 rounded-full bg-blue-50/50 group-hover:bg-blue-50 transition-colors duration-300">
+              <div className="mb-6 p-4 rounded-full transition-colors duration-300">
                 <div className="relative w-12 h-12">
                   <Image
                     src={item.image}
@@ -62,7 +62,7 @@ export default function DharmaAdvantages() {
                   />
                 </div>
               </div>
-              <h3 className="text-lg cabinet font-medium text-black">
+              <h3 className="text-lg  font-medium text-black">
                 {item.title}
               </h3>
             </motion.div>

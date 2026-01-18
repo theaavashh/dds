@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect } from 'react';
 
 const VideoLoader = () => {
@@ -15,7 +16,7 @@ const VideoLoader = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-white flex items-center justify-center">
+    <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
       <div className="relative w-full h-full flex items-center justify-center">
         <video
           src="/CDS Logo landscape.mp4"
@@ -23,7 +24,11 @@ const VideoLoader = () => {
           muted
           playsInline
           loop={false}
-          onEnded={() => setIsVisible(false)}
+          onEnded={() => {
+            setIsVisible(false);
+            // Scroll to top after video ends
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           className="max-w-full max-h-full object-contain"
         />
       </div>

@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google"; // Changed from Urbanist
 import "./globals.css";
 import { ReduxProvider } from "../providers/ReduxProvider";
 import VideoLoader from '../components/VideoLoader';
 
-const poppins = Poppins({ // Changed variable name
-  weight: ["300", "400", "500", "600", "700"], // Added 300 for light text
-  subsets: ["latin"],
-  display: "swap",
-});
+
 
 export const metadata: Metadata = {
   title: "Celebration Diamonds Studio| Moments of Precious Craft",
@@ -21,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.className}`}> {/* Changed variable usage */}
-      <body className="font-sans antialiased">
+    <html lang="en" > 
+      <body className="antialiased cabinet">
         <ReduxProvider>
           <VideoLoader />
           {children}

@@ -40,7 +40,7 @@ export default function ProductGrid() {
           <p className="text-gray-500 max-w-2xl mx-auto">Discover our exclusive selection of fine jewelry, designed to elegance and crafted to perfection.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => (
             <div key={product.id} className="group cursor-pointer">
               <div className="relative aspect-square overflow-hidden bg-gray-100 mb-4">

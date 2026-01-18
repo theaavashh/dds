@@ -45,7 +45,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="py-24 md:py-32 bg-white border-t border-gray-100">
+    <section className="py-24 bg-white border-t border-gray-100">
       <div className="container mx-auto px-6 md:px-12">
 
         <div className="max-w-xl mx-auto text-center">
@@ -55,10 +55,10 @@ export default function Newsletter() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl md:text-4xl font-normal text-gray-900 mb-4 tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-normal text-gray-900 mb-4 tracking-tight tan-agean">
               Subscribe to our newsletter.
             </h2>
-            <p className="text-gray-500 mb-12 font-light text-lg">
+            <p className="text-black mb-12 font-normal text-lg">
               Receive exclusive updates, portfolio highlights, and offers.
             </p>
 
@@ -86,7 +86,7 @@ export default function Newsletter() {
               <div className="flex justify-center mt-4">
                 <button
                   type="submit"
-                  className="group flex items-center gap-2 text-sm uppercase tracking-widest font-medium text-gray-900 hover:text-black transition-colors disabled:opacity-50"
+                  className="group flex items-center gap-2 text-md uppercase font-medium text-gray-900 hover:text-black transition-colors disabled:opacity-50"
                   disabled={status === 'loading' || isSubmitting}
                 >
                   <span>{status === 'loading' || isSubmitting ? 'Subscribing...' : 'Subscribe'}</span>
@@ -98,7 +98,7 @@ export default function Newsletter() {
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className={`text-center text-sm mt-2 ${status === 'success' ? 'text-green-600' : 'text-red-500'}`}
+                  className={`text-center text-md mt-2 ${status === 'success' ? 'text-green-600' : 'text-red-500'}`}
                 >
                   {message}
                 </motion.p>
@@ -108,12 +108,12 @@ export default function Newsletter() {
         </div>
 
         {/* Minimal Footer / Social Link */}
-        <div className="mt-24 md:mt-32 border-t border-gray-100 pt-12 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400 font-light">
-          <p>© 2026 Celebration Diamonds. All rights reserved.</p>
+        <div className="mt-32 pt-12 border-t border-gray-100  flex flex-col md:flex-row justify-between items-center text-lg text-black font-light cabinet">
+          <p className='font-medium'>Follow Us On</p>
           <div className="flex gap-8 mt-4 md:mt-0">
             <a href="#" className="hover:text-black transition-colors">Instagram</a>
-            <a href="#" className="hover:text-black transition-colors">LinkedIn</a>
-            <a href="#" className="hover:text-black transition-colors">Twitter</a>
+            <a href="#" className="hover:text-black transition-colors">Facebook</a>
+            <a href="#" className="hover:text-black transition-colors">Tiktok</a>
           </div>
         </div>
 

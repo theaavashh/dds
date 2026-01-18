@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, easeOut, AnimatePresence, Variants } from 'framer-motion';
-import { User, Search, Menu, X, ChevronRight } from 'lucide-react';
+import { User, Search, Menu, X, ChevronRight, ShoppingCart } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '@/store';
@@ -42,13 +42,13 @@ const tooltipVariants = {
 const searchInputVariants = {
   hidden: {
     opacity: 0,
-    scale: 0.95,
-    transition: { duration: 0.2 }
+    y: -50,
+    transition: { duration: 0.5, ease: easeOut }
   },
   visible: {
     opacity: 1,
-    scale: 1,
-    transition: { duration: 0.2 }
+    y: 0,
+    transition: { duration: 0.5, ease: easeOut }
   }
 }
 
@@ -87,13 +87,7 @@ const menuItems = [
       { label: 'MENS BRACELATE', href: '/jewelry/mens-bracelate' },
     ]
   },
-  { label: 'COLLECTION', href: '/collection', hasSubmenu: true },
-  { label: 'EVENTS', href: '/events' },
-  { label: 'PRIVACY POLICY', href: '/privacy-policy' },
-  { label: 'TERMS & CONDITIONS', href: '/terms-conditions' },
-  { label: 'FAQ', href: '/faq' },
-  { label: 'BLOG', href: '/blog' },
-  { label: 'CONTACT US', href: '/contact' },
+ 
 ];
 
 // Header props interface
@@ -105,16 +99,19 @@ interface HeaderProps {
 }
 
 export default function Header({
-  logoSrc = '/celeb.jpg',
+  logoSrc = '/celebration-diamond-golden.png',
   logoAlt = 'Logo',
-  logoWidth = 64,
-  logoHeight = 64
+  logoWidth = 70,
+  logoHeight = 70
 }: HeaderProps) {
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
   const [scrolled, setScrolled] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [isSearching, setIsSearching] = useState(false)
   const [showUserDropdown, setShowUserDropdown] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
@@ -125,7 +122,13 @@ export default function Header({
   const userState: any = useSelector((state: RootState) => state.user)
   const distributor: Distributor | null = userState.distributor
   const isAuthenticated: boolean = userState.isAuthenticated
+  const cartItems = useSelector((state: RootState) => state.cart.items)
   const dispatch = useDispatch<AppDispatch>()
+
+  // Update cart count whenever cart items change
+  useEffect(() => {
+    setCartCount(cartItems.reduce((total, item) => total + (item.quantity || 1), 0));
+  }, [cartItems]);
 
   // Handle click outside to close user dropdown
   useEffect(() => {
@@ -152,13 +155,25 @@ export default function Header({
   }, [])
 
   // Handle search submission
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      // Navigate to search results page
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-      // Hide search input after submission
-      setShowSearch(false)
+      setIsSearching(true);
+      try {
+        // Fetch search results from API
+        const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSearchResults(data.results || []);
+        } else {
+          setSearchResults([]);
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
     }
   }
 
@@ -171,6 +186,7 @@ export default function Header({
     setShowSearch(!showSearch)
     if (!showSearch) {
       setSearchQuery('')
+      setSearchResults([])
     }
   }
 
@@ -293,32 +309,139 @@ export default function Header({
             </div>
 
             {/* Center Search Input */}
-            <motion.div
-              className="absolute left-1/2 transform -translate-x-1/2 w-1/3"
-              initial="hidden"
-              animate={showSearch ? "visible" : "hidden"}
-              variants={searchInputVariants}
-            >
-              <form onSubmit={handleSearch} className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
-                  className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            <AnimatePresence>
+              {showSearch && (
+                <motion.div
+                  className="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg"
+                  initial="hidden"
+                  animate="visible"
+                  exit="hidden"
+                  variants={searchInputVariants}
                 >
-                  <Search className="h-5 w-5" />
-                </button>
-              </form>
-            </motion.div>
+                  <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-light text-gray-900">Search</h2>
+                      <button
+                        onClick={() => setShowSearch(false)}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      >
+                        <X className="w-6 h-6 text-gray-600" />
+                      </button>
+                    </div>
+                    
+                    <form onSubmit={handleSearch} className="relative mb-8">
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <Search className="h-6 w-6 text-gray-400" />
+                        </div>
+                        <input
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search for jewelry, collections, or more..."
+                          className="w-full pl-12 pr-4 py-4 text-lg border-b-2 border-gray-300 focus:outline-none focus:border-amber-500 transition-colors bg-transparent"
+                          autoFocus
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-amber-400 to-amber-600 scale-x-0 focus-within:scale-x-100 transition-transform duration-300"></div>
+                      </div>
+                    </form>
+
+                    {/* Search Results Container */}
+                    {searchQuery && (
+                      <motion.div 
+                        className="max-h-96 overflow-y-auto"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {isSearching ? (
+                          <div className="flex justify-center items-center h-32">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+                          </div>
+                        ) : searchResults.length > 0 ? (
+                          <div className="space-y-4">
+                            <p className="text-sm text-gray-600 mb-4">
+                              Found {searchResults.length} {searchResults.length === 1 ? 'result' : 'results'} for "{searchQuery}"
+                            </p>
+                            {searchResults.map((result: any, index: number) => (
+                              <div 
+                                key={index} 
+                                className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-all duration-200 group"
+                                onClick={() => {
+                                  router.push(`/product/${result.id}`);
+                                  setShowSearch(false);
+                                }}
+                              >
+                                <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden mr-4">
+                                  {result.image && (
+                                    <Image 
+                                      src={result.image} 
+                                      alt={result.name} 
+                                      width={64} 
+                                      height={64}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                    />
+                                  )}
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="font-medium text-gray-900 text-lg mb-1">{result.name}</h3>
+                                  <p className="text-amber-600 font-semibold">${result.price?.toFixed(2)}</p>
+                                </div>
+                                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-amber-600 transition-colors" />
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-12">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Search className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <p className="text-gray-500 text-lg mb-2">No results found</p>
+                            <p className="text-gray-400">Try searching with different keywords</p>
+                          </div>
+                        )}
+                      </motion.div>
+                    )}
+
+                    {/* Quick Search Suggestions */}
+                    {!searchQuery && (
+                      <div className="mt-8">
+                        <h3 className="text-sm font-medium text-gray-700 mb-4">Popular Searches</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {['Diamond Ring', 'Gold Necklace', 'Wedding Jewelry', 'Earrings', 'Bracelets'].map((term) => (
+                            <button
+                              key={term}
+                              onClick={() => setSearchQuery(term)}
+                              className="px-4 py-2 bg-gray-100 hover:bg-amber-50 hover:text-amber-600 rounded-full text-sm text-gray-700 transition-all duration-200"
+                            >
+                              {term}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Right Icons */}
             <div className="flex items-center space-x-5">
+              {/* Cart Icon - Always visible */}
+              <div className="relative">
+                {renderIconWithTooltip(
+                  <ShoppingCart className="h-5 w-5" />, 
+                  'Cart', 
+                  () => router.push('/cart')
+                )}
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </div>
+
               {isAuthenticated && distributor ? (
                 // Show user dropdown when authenticated
                 <div className="relative" ref={userDropdownRef}>

@@ -18,7 +18,7 @@ interface ContactInfo {
 
 const FOOTER_SECTIONS: FooterSection[] = [
   {
-    title: "ABOUT COMPANY",
+    title: "About Company",
     links: [
       { label: "ABOUT US", href: "#" },
       { label: "JEWELLERY GUIDE", href: "#" },
@@ -27,14 +27,14 @@ const FOOTER_SECTIONS: FooterSection[] = [
     ]
   },
   {
-    title: "POLICIES",
+    title: "Policies",
     links: [
       { label: "PRIVACY POLICY", href: "#" },
       { label: "TERMS OF USE", href: "#" },
     ]
   },
   {
-    title: "HELP",
+    title: "Help",
     links: [
       { label: "FAQ'S", href: "#" },
       { label: "CONTACT US", href: "#" },
@@ -60,13 +60,13 @@ export default function Footer() {
           {/* Render dynamic sections */}
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <h3 className="text-lg md:text-xl font-bold mb-6 uppercase cabinet">{section.title}</h3>
+              <h3 className="text-sm font-bold mb-6  tan-agean">{section.title}</h3>
               <ul className="space-y-3">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm md:text-md font-medium text-black uppercase hover:text-amber-600 transition-colors duration-200"
+                      className="text-sm md:text-lg font-medium text-black uppercase hover:text-amber-600 transition-colors duration-200 cabinet"
                     >
                       {link.label}
                     </Link>
@@ -78,10 +78,10 @@ export default function Footer() {
 
           {/* DIRECT CONTACT */}
           <div>
-            <h3 className="text-lg md:text-xl font-bold mb-6 uppercase cabinet">DIRECT CONTACT</h3>
+            <h3 className="text-sm font-bold mb-6  tan-agean">Direct Contact</h3>
             <ul className="space-y-4">
               <li>
-                <p className="text-sm md:text-md font-medium text-black uppercase">{CONTACT_INFO.phone}</p>
+                <p className="text-sm md:text-md font-medium text-black uppercase cabinet">{CONTACT_INFO.phone}</p>
               </li>
               <li>
                 <p className="text-sm md:text-md font-medium text-black uppercase break-all">{CONTACT_INFO.email}</p>

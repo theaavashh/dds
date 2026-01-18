@@ -29,36 +29,44 @@ export default function FAQPage() {
 
   const faqs = [
     {
-      question: "What is your return policy?",
-      answer: "We offer a 30-day return policy for all unworn jewelry items in their original condition. Items must include all original packaging and documentation. Please contact our customer service team to initiate a return."
+      question: "Are your diamonds natural or lab-grown?",
+      answer: "At Celebration Diamonds, we primarily deal in natural diamonds. Every diamond is scientifically tested and verified in our in-house gemological laboratory to confirm its origin, authenticity, and grading. Any disclosure, if applicable, is done with complete transparency."
     },
     {
-      question: "How do I care for my jewelry?",
-      answer: "To maintain the beauty of your jewelry, we recommend cleaning with a soft cloth and mild soap. Avoid exposure to harsh chemicals, perfumes, and lotions. Store in a dry place and remove during physical activities."
+      question: "How do you ensure the authenticity of your diamonds?",
+      answer: "Each loose diamond undergoes 28 internal analytical quality tests, conducted by GIA-trained diamond grading professionals and personally supervised by our senior gemologist with over 30 years of experience."
     },
     {
-      question: "Do you offer custom jewelry design?",
-      answer: "Yes, we offer custom design services to create unique pieces tailored to your preferences. Our team of designers will work with you from concept to completion to bring your vision to life."
+      question: "Do you provide diamond certificates?",
+      answer: "Yes. Diamonds are provided with proper grading documentation and verification. Our processes are backed by the Asian Gemological Laboratory & Institute Pvt. Ltd., ensuring scientific accuracy and reliability."
     },
     {
-      question: "How long does shipping take?",
-      answer: "Standard shipping takes 3-5 business days within the country. International shipping typically takes 7-14 business days depending on the destination. Expedited shipping options are available at checkout."
+      question: "What makes Celebration Diamonds different from other jewellers?",
+      answer: "We are Nepal\u2019s first diamond studio with an in-house advanced gemological laboratory. We don\u2019t rely solely on visual beauty \u2014 every diamond is tested for origin, cut precision, durability, and ethical integrity before it reaches you."
+    },
+    {
+      question: "Can I customise my jewellery?",
+      answer: "Absolutely. We specialise in bespoke diamond jewellery, working closely with clients to create pieces that reflect personal stories, emotions, and milestones \u2014 from engagement rings to heirloom creations."
+    },
+    {
+      question: "How do you address lab-grown diamonds and treated stones?",
+      answer: "In today\u2019s market, undisclosed lab-grown and treated diamonds are a concern. Our advanced detection technology and expert analysis ensure clear identification and full disclosure, so you always know exactly what you are purchasing."
     },
     {
       question: "Are your diamonds ethically sourced?",
-      answer: "Absolutely. We are committed to ethical sourcing and ensure all our diamonds and precious materials come from conflict-free sources that meet international standards."
+      answer: "Yes. Ethical responsibility is a core value at Celebration Diamonds. We carefully assess sourcing practices to ensure diamonds are obtained through responsible and ethical channels."
     },
     {
-      question: "Do you provide jewelry appraisals?",
-      answer: "Yes, we provide complimentary appraisals for all jewelry purchased from Celebration Diamonds. For existing pieces, we offer appraisal services through our certified gemologists."
+      question: "Can customers see the testing or verification process?",
+      answer: "Yes. Transparency builds trust. Wherever possible, we guide clients through the testing, grading, and verification process, helping them make confident and informed decisions."
     },
     {
-      question: "Can I resize my ring?",
-      answer: "Yes, we offer ring resizing services. The time and cost depend on the complexity of the piece. Please contact us to schedule an appointment with our craftsmen."
+      question: "Do you educate customers about diamonds?",
+      answer: "Yes. Knowledge is a luxury. Backed by a professional gemological institute, we believe in educating our clients, not just selling diamonds."
     },
     {
-      question: "What payment methods do you accept?",
-      answer: "We accept all major credit cards, debit cards, bank transfers, and digital payment methods. For high-value items, we also offer financing options subject to approval."
+      question: "Why is diamond testing important?",
+      answer: "Diamond testing protects you from misrepresentation, undisclosed treatments, and incorrect grading. It ensures long-term value, durability, and peace of mind."
     }
   ];
 
@@ -66,9 +74,9 @@ export default function FAQPage() {
     <div className="min-h-screen bg-white">
       <Header />
       
-      <main className="pt-24 pb-16">
+      <main className="pb-16">
         {/* Hero Section */}
-        <section className="relative py-20 md:py-32 bg-gradient-to-br from-amber-50 to-stone-100 overflow-hidden">
+        <section className="relative py-20 md:py-32 bg-black overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-100/20 to-stone-200/20"></div>
           <div className="container mx-auto px-4 md:px-6 relative z-10">
             <motion.div 
@@ -78,13 +86,13 @@ export default function FAQPage() {
               variants={staggerContainer}
             >
               <motion.h1 
-                className="text-4xl md:text-6xl font-bold text-gray-900 mb-6"
+                className="text-4xl md:text-6xl font-bold text-white mb-6 tan-agean leading-relaxed"
                 variants={fadeInUp}
               >
                 Frequently Asked <span className="text-amber-600">Questions</span>
               </motion.h1>
               <motion.p 
-                className="text-xl text-gray-600 max-w-2xl mx-auto"
+                className="text-xl text-white max-w-3xl mx-auto"
                 variants={fadeInUp}
               >
                 Find answers to common questions about our products, services, and policies
@@ -152,7 +160,7 @@ export default function FAQPage() {
               className="max-w-4xl mx-auto text-center"
             >
               <motion.h2 
-                className="text-3xl md:text-4xl font-bold text-gray-900 mb-6"
+                className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 tan-agean"
                 variants={fadeInUp}
               >
                 Still have <span className="text-amber-600">questions</span>?

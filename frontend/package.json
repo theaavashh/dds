@@ -3,12 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 6000",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 6000",
     "lint": "eslint"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@next/font": "^14.2.15",
     "@reduxjs/toolkit": "^2.11.2",
     "framer-motion": "^12.23.26",
@@ -18,9 +19,11 @@
     "rc-slider": "^11.1.9",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "react-hook-form": "^7.68.0",
+    "react-hook-form": "^7.71.1",
+    "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",
-    "react-toastify": "^11.0.5"
+    "react-toastify": "^11.0.5",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

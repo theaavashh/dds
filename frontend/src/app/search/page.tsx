@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, Fragment, Suspense } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Image from 'next/image';
@@ -39,6 +39,26 @@ interface Product {
 }
 
 export default function SearchPage() {
+  return (
+    <Suspense fallback={<SearchPageFallback />}>
+      <SearchPageContent />
+    </Suspense>
+  );
+}
+
+function SearchPageFallback() {
+  return (
+    <main className="min-h-screen bg-white">
+      <Header />
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <p className="text-center">Loading search results...</p>
+      </div>
+      <Footer />
+    </main>
+  );
+}
+
+function SearchPageContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get('q') || '';
   const [query, setQuery] = useState(initialQuery);
@@ -200,7 +220,7 @@ export default function SearchPage() {
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-600">Sort by :</span>
             <button className="bg-[#e6e6e6] px-4 py-2 text-[10px] font-bold text-gray-700 uppercase tracking-wide flex items-center gap-2 hover:bg-gray-300 transition-colors">
-              StyleCode (Z-{'>'}A)
+              StyleCode (Z-&gt;A)
             </button>
           </div>
         </div>
@@ -218,7 +238,7 @@ export default function SearchPage() {
 
           {/* Grid */}
           {products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {products.map((product) => (
                 <Link key={product.id} href={`/jewelry/${product.category}/${product.id}`} className="group relative">
                   {/* Image */}

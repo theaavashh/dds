@@ -36,11 +36,11 @@ const VideoDisplayAutoPlay = () => {
   }, []);
 
   return (
-    <div className="mx-auto max-w-5xl my-6">
+    <div className="max-full my-6">
       <video
         ref={videoRef}
         src="/Dharma-Home-Page-Video.mp4"
-        className="w-full h-auto object-cover max-h-[1200px]"
+        className="w-full h-auto object-cover max-h-[1600px]"
         autoPlay
         loop
         muted

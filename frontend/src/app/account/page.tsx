@@ -99,134 +99,216 @@ export default function Account() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar */}
           <div className="md:w-1/4">
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-lg font-semibold mb-4">My Account</h2>
-              <ul className="space-y-2">
-                <li>
-                  <Link href="/account" className="text-amber-600 font-medium">
-                    Account Information
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/my-orders" className="text-gray-600 hover:text-amber-600">
-                    My Orders
-                  </Link>
-                </li>
-              </ul>
+            <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden sticky top-8">
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-6 py-4 border-b border-gray-100">
+                <h2 className="text-lg font-medium tracking-wide text-gray-900">Account Menu</h2>
+              </div>
+              <nav className="p-4">
+                <ul className="space-y-1">
+                  <li>
+                    <Link 
+                      href="/account" 
+                      className="flex items-center px-4 py-3 text-amber-600 font-medium bg-amber-50 rounded-lg transition-all duration-200"
+                    >
+                      <div className="w-2 h-2 bg-amber-600 rounded-full mr-3"></div>
+                      Account Information
+                    </Link>
+                  </li>
+                  <li>
+                    <Link 
+                      href="/my-orders" 
+                      className="flex items-center px-4 py-3 text-gray-600 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all duration-200"
+                    >
+                      <div className="w-2 h-2 bg-transparent border border-gray-400 rounded-full mr-3"></div>
+                      My Orders
+                    </Link>
+                  </li>
+                </ul>
+              </nav>
             </div>
           </div>
 
           {/* Account Content */}
           <div className="md:w-3/4">
-            <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h2 className="text-xl font-semibold mb-6">Account Information</h2>
+            <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 px-8 py-6 border-b border-gray-100">
+                <h2 className="text-2xl font-light tracking-wide text-gray-900 mb-2">Account Information</h2>
+                <p className="text-sm text-gray-600">Update your personal and business details</p>
+              </div>
               
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      required
-                    />
+              <form onSubmit={handleSubmit} className="p-8">
+                {/* Personal Information Section */}
+                <div className="mb-10">
+                  <div className="flex items-center mb-6">
+                    <div className="w-1 h-6 bg-amber-500 mr-3"></div>
+                    <h3 className="text-lg font-medium text-gray-900">Personal Information</h3>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-amber-600">
+                        First Name
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all duration-200 placeholder-gray-400"
+                          placeholder="Enter your first name"
+                          required
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400 scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="group">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-amber-600">
+                        Last Name
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all duration-200 placeholder-gray-400"
+                          placeholder="Enter your last name"
+                          required
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400 scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="group">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-amber-600">
+                        Email Address
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all duration-200 placeholder-gray-400"
+                          placeholder="your.email@example.com"
+                          required
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400 scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="group">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-amber-600">
+                        Phone Number
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all duration-200 placeholder-gray-400"
+                          placeholder="+1 (555) 123-4567"
+                          required
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400 scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Business Information Section */}
+                <div className="mb-8">
+                  <div className="flex items-center mb-6">
+                    <div className="w-1 h-6 bg-amber-500 mr-3"></div>
+                    <h3 className="text-lg font-medium text-gray-900">Business Information</h3>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email Address
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Company Name
-                    </label>
-                    <input
-                      type="text"
-                      name="companyName"
-                      value={formData.companyName}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      City
-                    </label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Country
-                    </label>
-                    <input
-                      type="text"
-                      name="country"
-                      value={formData.country}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-amber-500"
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-amber-600">
+                        Company Name
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="companyName"
+                          value={formData.companyName}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all duration-200 placeholder-gray-400"
+                          placeholder="Enter your company name"
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400 scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="group">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-amber-600">
+                        City
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="city"
+                          value={formData.city}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all duration-200 placeholder-gray-400"
+                          placeholder="Enter your city"
+                          required
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400 scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
+                      </div>
+                    </div>
+                    
+                    <div className="group md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2 transition-colors group-hover:text-amber-600">
+                        Country
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="country"
+                          value={formData.country}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all duration-200 placeholder-gray-400"
+                          placeholder="Enter your country"
+                          required
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-amber-400 to-orange-400 scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="flex justify-end">
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-100">
                   <button
                     type="submit"
-                    className="bg-amber-600 text-white px-6 py-2 rounded-md hover:bg-amber-700 transition-colors"
+                    className="flex-1 sm:flex-none bg-gradient-to-r from-amber-500 to-amber-600 text-white px-8 py-3 rounded-lg font-medium hover:from-amber-600 hover:to-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200 shadow-sm hover:shadow-md"
                   >
                     Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (distributor) {
+                        setFormData({
+                          firstName: distributor.firstName || '',
+                          lastName: distributor.lastName || '',
+                          email: distributor.email || '',
+                          phone: distributor.phone || '',
+                          companyName: distributor.companyName || '',
+                          city: distributor.city || '',
+                          country: distributor.country || ''
+                        });
+                      }
+                    }}
+                    className="flex-1 sm:flex-none bg-white text-gray-700 px-8 py-3 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
+                  >
+                    Cancel
                   </button>
                 </div>
               </form>

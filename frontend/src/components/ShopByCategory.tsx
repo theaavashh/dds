@@ -57,15 +57,15 @@ const categories = [
 
 export default function ShopByCategory() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-10 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-2xl md:text-4xl font-bold text-black cabinet mb-4 uppercase ">
+          <h2 className="text-2xl md:text-3xl font-bold text-black tan-agean mb-4 uppercase ">
             SHOP BY CATEGORY
           </h2>
-          <p className="text-lg md:text-xl text-gray-600 uppercase font-semibold">
+          <p className="text-lg md:text-lg text-black uppercase font-normal ">
             CHOOSE FROM OUR VAST JEWELLERY COLLECTION
           </p>
         </div>
@@ -95,7 +95,7 @@ export default function ShopByCategory() {
                   {/* Optional overlay effect */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
                 </div>
-                <h3 className="text-md font-semibold text-black cabinet uppercase">
+                <h3 className="text-md font-normal text-black cabinet uppercase">
                   {category.name}
                 </h3>
               </motion.div>
