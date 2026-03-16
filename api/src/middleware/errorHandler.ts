@@ -1,8 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { ApiResponse, ApiError } from '../types';
+import logger from '../utils/logger';
 
 export const errorHandler = (err: ApiError, _req: Request, res: Response<ApiResponse<unknown>>, _next: NextFunction) => {
-  console.error('Unhandled error:', err);
+  logger.error(`Unhandled error: ${err.message}\nStack: ${err.stack}`);
 
   // Default error response
   const errorResponse: ApiResponse<unknown> = {

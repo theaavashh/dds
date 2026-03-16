@@ -36,7 +36,7 @@ const VideoDisplay = () => {
 
   return (
     <div 
-      className="relative w-full overflow-hidden"
+      className="relative w-full overflow-hidden mt-32"
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >

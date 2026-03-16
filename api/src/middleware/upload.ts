@@ -27,6 +27,9 @@ const storage = multer.diskStorage({
     } else if ((fieldName === 'leftImage' || fieldName === 'rightImage' || fieldName === 'leftBgImage' || fieldName === 'rightBgImage' || fieldName === 'desktopImage' || fieldName === 'mobileImage') && (req.path.includes('/hero-section') || req.originalUrl.includes('/hero-section'))) {
       destination = 'uploads/hero/';
     } else if (fieldName === 'images' && (req.path.includes('/products') || req.originalUrl.includes('/products'))) {
+      // For product images, we need to determine the category
+      // Since the body might not be parsed yet, we'll need to handle this differently
+      // We'll create a generic products directory for now, and the controller will handle moving files if needed
       destination = 'uploads/products/';
     } else if (fieldName === 'image' && (req.path.includes('/mid-banners') || req.originalUrl.includes('/mid-banners'))) {
       destination = 'uploads/mid-banners/';

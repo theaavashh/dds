@@ -1,8 +1,43 @@
 import { Request, Response } from 'express';
 import { PrismaClient, Prisma } from '@prisma/client';
-import { Product, ApiResponse } from '../types';
+import { ApiResponse } from '../types';
+import { Product } from '../types';
+import fs from 'fs';
+import path from 'path';
 
+
+// Import prisma client
 const prisma = new PrismaClient();
+
+// Helper function to ensure directory exists
+const ensureDirectoryExists = (dirPath: string) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
+
+// Move uploaded files to category-specific directory
+const moveFilesToCategoryDir = (imageUrls: string[], category: string): string[] => {
+  if (!category) return imageUrls;
+  
+  const categoryDir = path.join('uploads', 'products', category.toLowerCase());
+  ensureDirectoryExists(categoryDir);
+  
+  return imageUrls.map(url => {
+    // Parse the filename from the URL
+    const filename = path.basename(url);
+    const oldPath = path.join(process.cwd(), url.substring(1)); // Remove leading slash
+    const newPath = path.join(categoryDir, filename);
+    
+    // Move the file to the category directory
+    if (fs.existsSync(oldPath)) {
+      fs.renameSync(oldPath, newPath);
+    }
+    
+    // Return the new URL with category subdirectory
+    return `/uploads/products/${category.toLowerCase()}/${filename}`;
+  });
+};
 
 function toBool(v: any, fallback: boolean = false): boolean {
   if (typeof v === 'boolean') return v;
@@ -26,6 +61,7 @@ function extractUploads(req: Request) {
   if (req.files) {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     if (files.images) {
+      // Initially store in the default location
       imageUrls = files.images.map(f => `/uploads/products/${f.filename}`);
     }
     if (files.video && files.video.length > 0) {
@@ -49,7 +85,7 @@ async function upsertImages(productId: string, uploaded: string[], preserved?: s
     const existingImages = await prisma.productImage.findMany({ where: { productId } });
     for (let i = 0; i < preserved.length; i++) {
       const url = preserved[i];
-      const existing = existingImages.find(img => img.url === url);
+      const existing = existingImages.find((img: any) => img.url === url);
       if (existing) {
         await prisma.productImage.update({ where: { id: existing.id }, data: { order: i, isActive: true } });
       } else {
@@ -57,7 +93,7 @@ async function upsertImages(productId: string, uploaded: string[], preserved?: s
       }
     }
     const keep = new Set(preserved);
-    const deactivate = existingImages.filter(img => !keep.has(img.url));
+    const deactivate = existingImages.filter((img: any) => !keep.has(img.url));
     for (const image of deactivate) {
       await prisma.productImage.update({ where: { id: image.id }, data: { isActive: false } });
     }
@@ -69,12 +105,20 @@ async function upsertImages(productId: string, uploaded: string[], preserved?: s
 // Get all products (public)
 export const getAllProducts = async (req: Request, res: Response<ApiResponse<Product[]>>) => {
   try {
-    const { category, search, page = 1, limit = 12, auth } = req.query;
+    const { category, search, page = '1', limit = '12', auth } = req.query;
     const isAuthenticated = auth === 'true';
+    
+    // Convert page and limit to numbers with defaults
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    
+    // Validate and set defaults if conversion fails
+    const validPage = isNaN(pageNum) || pageNum < 1 ? 1 : pageNum;
+    const validLimit = isNaN(limitNum) || limitNum < 1 ? 12 : Math.min(limitNum, 100); // Max 100 per page to prevent abuse
 
     const channelCheck = isAuthenticated
       ? { OR: [{ website: true }, { distributor: true }] }
-      : { website: true };
+      : { OR: [{ website: true }, { normalUser: true }] };
 
     const searchConditions = search ? {
       OR: [
@@ -92,13 +136,13 @@ export const getAllProducts = async (req: Request, res: Response<ApiResponse<Pro
       ...searchConditions
     };
 
-    const skip = (Number(page) - 1) * Number(limit);
+    const skip = (validPage - 1) * validLimit;
 
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
         skip,
-        take: Number(limit),
+        take: validLimit,
         orderBy: { createdAt: 'desc' },
         include: {
           images: {
@@ -120,10 +164,10 @@ export const getAllProducts = async (req: Request, res: Response<ApiResponse<Pro
       count: sanitized.length,
       total,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
+        page: validPage,
+        limit: validLimit,
         total,
-        pages: Math.ceil(total / Number(limit))
+        pages: Math.ceil(total / validLimit)
       }
     });
   } catch (error) {
@@ -139,7 +183,15 @@ export const getAllProducts = async (req: Request, res: Response<ApiResponse<Pro
 // Get all products (admin)
 export const getAdminProducts = async (req: Request, res: Response<ApiResponse<Product[]>>) => {
   try {
-    const { category, search, status, page = 1, limit = 10 } = req.query;
+    const { category, search, status, page = '1', limit = '10' } = req.query;
+    
+    // Convert page and limit to numbers with defaults
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    
+    // Validate and set defaults if conversion fails
+    const adminValidPage = isNaN(pageNum) || pageNum < 1 ? 1 : pageNum;
+    const adminValidLimit = isNaN(limitNum) || limitNum < 1 ? 10 : Math.min(limitNum, 100); // Max 100 per page to prevent abuse
 
     const where: any = {};
 
@@ -164,13 +216,13 @@ export const getAdminProducts = async (req: Request, res: Response<ApiResponse<P
       where.status = status as string;
     }
 
-    const skip = (Number(page) - 1) * Number(limit);
+    const skip = (adminValidPage - 1) * adminValidLimit;
 
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
         skip,
-        take: Number(limit),
+        take: adminValidLimit,
         orderBy: { createdAt: 'desc' },
         include: {
           images: {
@@ -191,10 +243,10 @@ export const getAdminProducts = async (req: Request, res: Response<ApiResponse<P
       count: sanitized.length,
       total,
       pagination: {
-        page: Number(page),
-        limit: Number(limit),
+        page: adminValidPage,
+        limit: adminValidLimit,
         total,
-        pages: Math.ceil(total / Number(limit))
+        pages: Math.ceil(total / adminValidLimit)
       }
     });
   } catch (error) {
@@ -254,6 +306,10 @@ export const createProduct = async (req: Request, res: Response<ApiResponse<Prod
       category,
       subCategory,
       price,
+      comparePrice,
+      costPrice,
+      discountPrice,
+      discountPercentage,
       stock,
       isActive = true,
       // Gold Fields
@@ -298,16 +354,81 @@ export const createProduct = async (req: Request, res: Response<ApiResponse<Prod
       normalUser = false,
       resellerUser = false,
       culture,
+      // Inventory & SKU
+      sku,
+      weight,
+      dimensions,
+      minOrderQuantity,
+      maxOrderQuantity,
+      stoneWeight,
+      caret,
+      // Feature Flags
+      isFeatured,
+      isDigital,
+      requiresShipping,
+      trackQuantity,
+      allowBackorder,
+      xmlSitemap,
+      // Additional Content
+      indexingAndDiscovery,
+      contentElement,
+      faqs,
+      tags,
+      // SEO Fields
       seoTitle,
       seoDescription,
       seoKeywords,
       seoSlug,
+      metaDescription,
+      canonicalUrl,
+      robotsMeta,
+      seoFriendlyImageFilename,
+      imageAltText,
+      imageTitle,
+      imageWidth,
+      imageHeight,
+      lazyLoading,
+      productSchema,
+      offerSchema,
+      brandSchema,
+      breadcrumbSchema,
+      itemListSchema,
+      faqSchema,
+      ogTitle,
+      ogDescription,
+      ogImage,
+      twitterCard,
+      twitterTitle,
+      twitterDescription,
+      twitterImage,
+      optimizedImageFormat,
       videoUrl
     } = req.body;
 
     const safeName = toStr(name);
     const safeCategory = toStr(category);
     const { imageUrls, uploadedVideoUrl } = extractUploads(req);
+    
+    // If category is provided, move files to category-specific directory
+    let processedImageUrls = imageUrls;
+    if (safeCategory) {
+      processedImageUrls = moveFilesToCategoryDir(imageUrls, safeCategory);
+    }
+
+    // Check if productCode already exists
+    if (productCode) {
+      const existingProduct = await prisma.product.findUnique({
+        where: { productCode }
+      });
+      
+      if (existingProduct) {
+        return res.status(409).json({
+          success: false,
+          message: 'Product Code already exists',
+          error: 'Unique constraint violation'
+        });
+      }
+    }
 
     // Create product first
     const product = await prisma.product.create({
@@ -319,9 +440,13 @@ export const createProduct = async (req: Request, res: Response<ApiResponse<Prod
         category: safeCategory,
         subCategory,
         price: toNum(price, 0),
+        comparePrice: comparePrice ? toNum(comparePrice) : null,
+        costPrice: costPrice ? toNum(costPrice) : null,
+        discountPrice: discountPrice ? toNum(discountPrice) : null,
+        discountPercentage: discountPercentage ? toNum(discountPercentage) : null,
         stock: toNum(stock, 0),
         isActive: toBool(isActive, true),
-        imageUrl: imageUrls.length > 0 ? imageUrls[0] : null, // Keep for backward compatibility
+        imageUrl: processedImageUrls.length > 0 ? processedImageUrls[0] : null, // Keep for backward compatibility
         // Gold Fields
         goldWeight,
         goldPurity,
@@ -361,21 +486,65 @@ export const createProduct = async (req: Request, res: Response<ApiResponse<Prod
         digitalBrowser: toBool(digitalBrowser, false),
         website: toBool(website, false),
         distributor: toBool(distributor, false),
+        normalUser: toBool(normalUser, false),
+        resellerUser: toBool(resellerUser, false),
         culture: culture || null,
+        // Inventory & SKU
+        sku: sku || null,
+        weight: weight ? toNum(weight) : null,
+        dimensions: dimensions || null,
+        minOrderQuantity: minOrderQuantity ? toNum(minOrderQuantity) : null,
+        maxOrderQuantity: maxOrderQuantity ? toNum(maxOrderQuantity) : null,
+        stoneWeight: stoneWeight || null,
+        caret: caret || null,
+        // Feature Flags
+        isFeatured: toBool(isFeatured, false),
+        isDigital: toBool(isDigital, false),
+        requiresShipping: toBool(requiresShipping, true),
+        trackQuantity: toBool(trackQuantity, true),
+        allowBackorder: toBool(allowBackorder, false),
+        xmlSitemap: toBool(xmlSitemap, false),
+        // Additional Content
+        indexingAndDiscovery: indexingAndDiscovery || null,
+        contentElement: contentElement || null,
+        faqs: faqs || null,
+        tags: tags || [],
+        // SEO Fields
         seoTitle: seoTitle || null,
         seoDescription: seoDescription || null,
         seoKeywords: seoKeywords || null,
         seoSlug: seoSlug || null,
+        metaDescription: metaDescription || null,
+        canonicalUrl: canonicalUrl || null,
+        robotsMeta: robotsMeta || null,
+        seoFriendlyImageFilename: seoFriendlyImageFilename || null,
+        imageAltText: imageAltText || null,
+        imageTitle: imageTitle || null,
+        imageWidth: imageWidth ? toNum(imageWidth) : null,
+        imageHeight: imageHeight ? toNum(imageHeight) : null,
+        lazyLoading: lazyLoading !== undefined ? toBool(lazyLoading) : true,
+        productSchema: productSchema ? JSON.parse(productSchema) : null,
+        offerSchema: offerSchema ? JSON.parse(offerSchema) : null,
+        brandSchema: brandSchema ? JSON.parse(brandSchema) : null,
+        breadcrumbSchema: breadcrumbSchema ? JSON.parse(breadcrumbSchema) : null,
+        itemListSchema: itemListSchema ? JSON.parse(itemListSchema) : null,
+        faqSchema: faqSchema ? JSON.parse(faqSchema) : null,
+        ogTitle: ogTitle || null,
+        ogDescription: ogDescription || null,
+        ogImage: ogImage || null,
+        twitterCard: twitterCard || null,
+        twitterTitle: twitterTitle || null,
+        twitterDescription: twitterDescription || null,
+        twitterImage: twitterImage || null,
+        optimizedImageFormat: optimizedImageFormat || null,
         // @ts-ignore - videoUrl exists in schema but TypeScript is not recognizing it
         videoUrl: uploadedVideoUrl || videoUrl || null,
-        normalUser: toBool(normalUser, false),
-        resellerUser: toBool(resellerUser, false),
         status: 'draft' // Default status
       } as any
     });
 
-    if (imageUrls.length > 0) {
-      const productImages = imageUrls.map((url: string, index: number) => ({ productId: product.id, url, order: index, isActive: true }));
+    if (processedImageUrls.length > 0) {
+      const productImages = processedImageUrls.map((url: string, index: number) => ({ productId: product.id, url, order: index, isActive: true }));
       await prisma.productImage.createMany({ data: productImages });
     }
 
@@ -394,12 +563,14 @@ export const createProduct = async (req: Request, res: Response<ApiResponse<Prod
       message: 'Product created successfully',
       data: completeProduct as unknown as Product
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating product:', error);
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      const target = error.meta?.target as string[];
+      const field = target?.[0] || 'field';
       res.status(409).json({
         success: false,
-        message: 'Product Code already available',
+        message: `${field} already exists`,
         error: 'Unique constraint violation'
       });
       return;
@@ -436,6 +607,10 @@ export const updateProduct = async (req: Request, res: Response<ApiResponse<Prod
       category,
       subCategory,
       price,
+      comparePrice,
+      costPrice,
+      discountPrice,
+      discountPercentage,
       stock,
       isActive,
       status,
@@ -481,10 +656,54 @@ export const updateProduct = async (req: Request, res: Response<ApiResponse<Prod
       normalUser,
       resellerUser,
       culture,
+      // Inventory & SKU
+      sku,
+      weight,
+      dimensions,
+      minOrderQuantity,
+      maxOrderQuantity,
+      stoneWeight,
+      caret,
+      // Feature Flags
+      isFeatured,
+      isDigital,
+      requiresShipping,
+      trackQuantity,
+      allowBackorder,
+      xmlSitemap,
+      // Additional Content
+      indexingAndDiscovery,
+      contentElement,
+      faqs,
+      tags,
+      // SEO Fields
       seoTitle,
       seoDescription,
       seoKeywords,
       seoSlug,
+      metaDescription,
+      canonicalUrl,
+      robotsMeta,
+      seoFriendlyImageFilename,
+      imageAltText,
+      imageTitle,
+      imageWidth,
+      imageHeight,
+      lazyLoading,
+      productSchema,
+      offerSchema,
+      brandSchema,
+      breadcrumbSchema,
+      itemListSchema,
+      faqSchema,
+      ogTitle,
+      ogDescription,
+      ogImage,
+      twitterCard,
+      twitterTitle,
+      twitterDescription,
+      twitterImage,
+      optimizedImageFormat,
       videoUrl
     } = req.body;
 
@@ -523,8 +742,14 @@ export const updateProduct = async (req: Request, res: Response<ApiResponse<Prod
       try { preservedImageUrls = JSON.parse(req.body.imageUrls); } catch { }
     }
 
+    // If category changed and new images were uploaded, move files to new category directory
+    let processedImageUrls = imageUrls;
+    if (category && category !== existingProduct.category && imageUrls.length > 0) {
+      processedImageUrls = moveFilesToCategoryDir(imageUrls, category);
+    }
+
     // If new images are uploaded, update the product and create new image records
-    const mainImageUrl = await upsertImages(id, imageUrls, preservedImageUrls);
+    let mainImageUrl = await upsertImages(id, processedImageUrls, preservedImageUrls);
     (req.body as any).imageUrl = mainImageUrl;
 
     console.log('Final update data:', {
@@ -596,6 +821,10 @@ export const updateProduct = async (req: Request, res: Response<ApiResponse<Prod
         category,
         subCategory,
         price: toNum(price, 0),
+        comparePrice: comparePrice ? toNum(comparePrice) : null,
+        costPrice: costPrice ? toNum(costPrice) : null,
+        discountPrice: discountPrice ? toNum(discountPrice) : null,
+        discountPercentage: discountPercentage ? toNum(discountPercentage) : null,
         stock: toNum(stock, 0),
         isActive: toBool(isActive, true),
         // @ts-ignore - status exists in schema but TypeScript is not recognizing it
@@ -643,10 +872,54 @@ export const updateProduct = async (req: Request, res: Response<ApiResponse<Prod
         normalUser: toBool(normalUser, false),
         resellerUser: toBool(resellerUser, false),
         culture: culture || null,
+        // Inventory & SKU
+        sku: sku || null,
+        weight: weight ? toNum(weight) : null,
+        dimensions: dimensions || null,
+        minOrderQuantity: minOrderQuantity ? toNum(minOrderQuantity) : null,
+        maxOrderQuantity: maxOrderQuantity ? toNum(maxOrderQuantity) : null,
+        stoneWeight: stoneWeight || null,
+        caret: caret || null,
+        // Feature Flags
+        isFeatured: toBool(isFeatured, false),
+        isDigital: toBool(isDigital, false),
+        requiresShipping: toBool(requiresShipping, true),
+        trackQuantity: toBool(trackQuantity, true),
+        allowBackorder: toBool(allowBackorder, false),
+        xmlSitemap: toBool(xmlSitemap, false),
+        // Additional Content
+        indexingAndDiscovery: indexingAndDiscovery || null,
+        contentElement: contentElement || null,
+        faqs: faqs || null,
+        tags: tags || [],
+        // SEO Fields
         seoTitle: seoTitle || null,
         seoDescription: seoDescription || null,
         seoKeywords: seoKeywords || null,
         seoSlug: seoSlug || null,
+        metaDescription: metaDescription || null,
+        canonicalUrl: canonicalUrl || null,
+        robotsMeta: robotsMeta || null,
+        seoFriendlyImageFilename: seoFriendlyImageFilename || null,
+        imageAltText: imageAltText || null,
+        imageTitle: imageTitle || null,
+        imageWidth: imageWidth ? toNum(imageWidth) : null,
+        imageHeight: imageHeight ? toNum(imageHeight) : null,
+        lazyLoading: lazyLoading !== undefined ? toBool(lazyLoading) : true,
+        productSchema: productSchema ? JSON.parse(productSchema) : null,
+        offerSchema: offerSchema ? JSON.parse(offerSchema) : null,
+        brandSchema: brandSchema ? JSON.parse(brandSchema) : null,
+        breadcrumbSchema: breadcrumbSchema ? JSON.parse(breadcrumbSchema) : null,
+        itemListSchema: itemListSchema ? JSON.parse(itemListSchema) : null,
+        faqSchema: faqSchema ? JSON.parse(faqSchema) : null,
+        ogTitle: ogTitle || null,
+        ogDescription: ogDescription || null,
+        ogImage: ogImage || null,
+        twitterCard: twitterCard || null,
+        twitterTitle: twitterTitle || null,
+        twitterDescription: twitterDescription || null,
+        twitterImage: twitterImage || null,
+        optimizedImageFormat: optimizedImageFormat || null,
         // @ts-ignore - videoUrl exists in schema but TypeScript is not recognizing it
         videoUrl: uploadedVideoUrl || videoUrl || null
       } as any
@@ -668,7 +941,7 @@ export const updateProduct = async (req: Request, res: Response<ApiResponse<Prod
       message: 'Product updated successfully',
       data: completeProduct as unknown as Product
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating product:', error);
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       res.status(409).json({
@@ -782,7 +1055,7 @@ export const getProductCategories = async (_req: Request, res: Response<ApiRespo
     });
 
     // Get full category objects from the categories table
-    const categoryIds = productCategories.map(c => c.category);
+    const categoryIds = productCategories.map((c: any) => c.category);
     const categories = await prisma.category.findMany({
       where: {
         id: { in: categoryIds },

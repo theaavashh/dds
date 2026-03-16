@@ -1,0 +1,40 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/theaavashh/workplace/celebration-diamonds/api/logs/.8a78ff2d0c63064bedc9c8dfb713d59aac77c695-audit.json",
+    "files": [
+        {
+            "date": 1770177077785,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/error-2026-02-04.log",
+            "hash": "a05a6d972b4117357e9950303157d1adfe9caa1859a77066deb8f81240908353"
+        },
+        {
+            "date": 1770263276481,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/error-2026-02-05.log",
+            "hash": "c7f45fa52aacb70d3b76b078e70c60ba9199056bd38e7a963fcb51572bc30176"
+        },
+        {
+            "date": 1770345637819,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/error-2026-02-06.log",
+            "hash": "70a2007a46ef7fb396b925e38a3f937c30368d5f55fddba5593f21c05205ac45"
+        },
+        {
+            "date": 1770531442135,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/error-2026-02-08.log",
+            "hash": "94966fa8e0130aa35c70c8c29f342f836d870a7a0cf184b7052ae3dee42e273f"
+        },
+        {
+            "date": 1770832223086,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/error-2026-02-11.log",
+            "hash": "1605f40fb43efac89e5ca4b760649716dd990a0844327bfc070f494811ca1f02"
+        },
+        {
+            "date": 1770836874274,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/error-2026-02-12.log",
+            "hash": "b878c440e8b5f8bda78b345a4ebf5e737649d64d808ec8569c341fd190442b76"
+        }
+    ],
+    "hashType": "sha256"
+}

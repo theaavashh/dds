@@ -1,13 +1,11 @@
-import localFont from 'next/font/local'
+// Using system mono sans fonts via CSS
+// No font files needed - relying on system fonts
+export const customFont = {
+  className: 'font-mono',
+  variable: '--font-mono-sans',
+}
 
-export const customFont = localFont({
-  src: '../../public/fonts/AkzidenzGroteskPro-Ext.woff2',
-  variable: '--font-custom',
-  display: 'swap',
-})
-
-export const titleFont = localFont({
-  src: '../../public/fonts/title-regular.f7f2da3f7d1f78b3f788.woff2',
-  variable: '--font-title',
-  display: 'swap',
-})
+export const titleFont = {
+  className: 'font-mono',
+  variable: '--font-mono-sans',
+}

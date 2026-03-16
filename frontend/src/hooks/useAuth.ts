@@ -21,12 +21,13 @@ export const useAuth = () => {
   const checkAuthStatus = async () => {
     dispatch(setLoading(true));
     try {
-      // Use the API URL from environment variables or default to /api
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-      const response = await fetch(`${apiUrl}/api/distributors/profile`, {
+      // Use the API proxy (handled by Next.js rewrites)
+      const apiKey = process.env.NEXT_PUBLIC_FRONTEND_API_KEY || 'frontend_secure_key_2024_change_me';
+      const response = await fetch(`/api/distributors/profile`, {
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          'x-api-key': apiKey,
         },
       });
 
@@ -40,8 +41,10 @@ export const useAuth = () => {
       } else if (response.status === 401) {
         // Only clear the user if the server explicitly says the token is invalid
         dispatch(clearUser());
+      } else {
+        // For other HTTP errors, log but don't clear the user
+        console.warn(`Auth check failed with status ${response.status}`);
       }
-      // For other status codes (like 500, network errors), don't clear the user
     } catch (error) {
       console.error('Auth check failed:', error);
       // Don't clear the user on network errors - maintain existing state
@@ -56,11 +59,14 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      // Use the API URL from environment variables or default to /api
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-      await fetch(`${apiUrl}/api/distributors/logout`, {
+      // Use the API proxy (handled by Next.js rewrites)
+      const apiKey = process.env.NEXT_PUBLIC_FRONTEND_API_KEY || 'frontend_secure_key_2024_change_me';
+      await fetch(`/api/distributors/logout`, {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          'x-api-key': apiKey,
+        },
       });
     } catch (error) {
       console.error('Logout error:', error);

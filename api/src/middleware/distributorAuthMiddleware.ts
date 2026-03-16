@@ -45,7 +45,7 @@ export const distributorAuthMiddleware = async (req: AuthenticatedRequest, res: 
       }
     });
 
-    if (!distributor || distributor.status !== 'active') {
+    if (!distributor || (distributor.status !== 'active' && distributor.status !== 'approved')) {
       return res.status(401).json({
         success: false,
         message: 'Invalid token or distributor account deactivated.'

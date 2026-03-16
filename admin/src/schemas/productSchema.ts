@@ -1,239 +1,126 @@
 import { z } from 'zod';
 
 export const productSchema = z.object({
-  name: z
-    .string()
-    .max(200, 'Product name must be less than 200 characters')
-    .optional(),
-  
-  slug: z
-    .string()
-    .max(200, 'Slug must be less than 200 characters')
-    .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens')
-    .optional(),
-  
-  description: z
-    .string()
-    .max(5000, 'Description must be less than 5000 characters')
-    .optional(),
-  
-  shortDescription: z
-    .string()
-    .max(500, 'Short description must be less than 500 characters')
-    .optional(),
-  
-  price: z
-    .union([z.string(), z.number()])
-    .transform((val) => {
-      const num = typeof val === 'string' ? parseFloat(val) : val;
-      if (isNaN(num)) throw new Error('Price must be a valid number');
-      return num;
-    })
-    .refine((val) => val >= 0, 'Price must be a positive number')
-    .refine((val) => val <= 999999.99, 'Price must be less than 999,999.99'),
-  
-  comparePrice: z
-    .union([z.string(), z.number()])
-    .transform((val) => {
-      if (val === '' || val === null || val === undefined) return undefined;
-      const num = typeof val === 'string' ? parseFloat(val) : val;
-      if (isNaN(num)) throw new Error('Compare price must be a valid number');
-      return num;
-    })
-    .refine((val) => val === undefined || val >= 0, 'Compare price must be a positive number')
-    .refine((val) => val === undefined || val <= 999999.99, 'Compare price must be less than 999,999.99')
-    .optional(),
-  
-  costPrice: z
-    .union([z.string(), z.number()])
-    .transform((val) => {
-      if (val === '' || val === null || val === undefined) return undefined;
-      const num = typeof val === 'string' ? parseFloat(val) : val;
-      if (isNaN(num)) throw new Error('Cost price must be a valid number');
-      return num;
-    })
-    .refine((val) => val === undefined || val >= 0, 'Cost price must be a positive number')
-    .refine((val) => val === undefined || val <= 999999.99, 'Cost price must be less than 999,999.99')
-    .optional(),
-  
-  discountPrice: z
-    .union([z.string(), z.number()])
-    .transform((val) => {
-      if (val === '' || val === null || val === undefined) return undefined;
-      const num = typeof val === 'string' ? parseFloat(val) : val;
-      if (isNaN(num)) throw new Error('Discount price must be a valid number');
-      return num;
-    })
-    .refine((val) => val === undefined || val >= 0, 'Discount price must be a positive number')
-    .refine((val) => val === undefined || val <= 999999.99, 'Discount price must be less than 999,999.99')
-    .optional(),
-  
-  discountPercentage: z
-    .union([z.string(), z.number()])
-    .transform((val) => {
-      if (val === '' || val === null || val === undefined) return undefined;
-      const num = typeof val === 'string' ? parseFloat(val) : val;
-      if (isNaN(num)) throw new Error('Discount percentage must be a valid number');
-      return num;
-    })
-    .refine((val) => val === undefined || val >= 0, 'Discount percentage must be a positive number')
-    .refine((val) => val === undefined || val <= 100, 'Discount percentage cannot exceed 100%')
-    .optional(),
-  
-  margin: z
-    .union([z.string(), z.number()])
-    .transform((val) => {
-      if (val === '' || val === null || val === undefined) return undefined;
-      const num = typeof val === 'string' ? parseFloat(val) : val;
-      if (isNaN(num)) throw new Error('Margin must be a valid number');
-      return num;
-    })
-    .refine((val) => val === undefined || val >= 0, 'Margin must be a positive number')
-    .refine((val) => val === undefined || val <= 999999.99, 'Margin must be less than 999,999.99')
-    .optional(),
-  
-  minOrderQuantity: z
-    .number()
-    .int('Minimum order quantity must be a whole number')
-    .min(1, 'Minimum order quantity must be at least 1')
-    .max(999, 'Minimum order quantity must be less than 999')
-    .optional(),
-  
-  maxOrderQuantity: z
-    .number()
-    .int('Maximum order quantity must be a whole number')
-    .min(1, 'Maximum order quantity must be at least 1')
-    .max(999, 'Maximum order quantity must be less than 999')
-    .optional(),
-  
-  sku: z
-    .string()
-    .min(3, 'SKU must be at least 3 characters')
-    .max(100, 'SKU must be less than 100 characters')
-    .regex(/^[A-Z0-9-_]+$/, 'SKU must contain only uppercase letters, numbers, hyphens, and underscores')
-    .optional(),
-  
-  categoryId: z
-    .string()
-    .optional(),
-  
-  subCategoryId: z
-    .string()
-    .optional(),
-  
-  brandId: z
-    .string()
-    .optional(),
-  
-  tags: z
-    .array(z.string())
-    .max(20, 'Maximum 20 tags allowed')
-    .default([]),
-  
-  images: z
-    .array(z.string())
-    .max(10, 'Maximum 10 images allowed')
-    .default([]),
-  
+  // Basic Info
+  name: z.string().min(1, 'Product name is required').max(200),
+  productCode: z.string().min(1, 'Product code is required').max(100),
+  description: z.string().max(5000).optional(),
+  fullDescription: z.string().max(10000).optional(),
+  category: z.string().min(1, 'Category is required'),
+  subCategory: z.string().optional(),
+  status: z.string().default('draft'),
+
+  // Pricing & Stock
+  price: z.coerce.number().min(0),
+  comparePrice: z.coerce.number().min(0).optional(),
+  costPrice: z.coerce.number().min(0).optional(),
+  discountPrice: z.coerce.number().min(0).optional(),
+  discountPercentage: z.coerce.number().min(0).max(100).optional(),
+  stock: z.coerce.number().int().min(0).default(0),
+
+  // Channel Flags
   isActive: z.boolean().default(true),
-  
-  stock: z
-    .union([z.string(), z.number()])
-    .transform((val) => {
-      if (val === '' || val === null || val === undefined) return 0;
-      const num = typeof val === 'string' ? parseInt(val) : val;
-      if (isNaN(num)) throw new Error('Stock must be a valid number');
-      return num;
-    })
-    .refine((val) => Number.isInteger(val), 'Stock must be a whole number')
-    .refine((val) => val >= 0, 'Stock cannot be negative')
-    .refine((val) => val <= 999999, 'Stock must be less than 999,999')
-    .default(0),
-  
-  weight: z
-    .number()
-    .min(0, 'Weight must be a positive number')
-    .max(9999.99, 'Weight must be less than 9,999.99')
-    .optional(),
-  
+  digitalBrowser: z.boolean().default(false),
+  distributor: z.boolean().default(false),
+  website: z.boolean().default(false),
+  normalUser: z.boolean().default(false),
+  resellerUser: z.boolean().default(false),
+  culture: z.string().optional(),
+
+  // Jewelry - Gold
+  goldWeight: z.string().optional(),
+  goldPurity: z.string().optional(),
+  goldType: z.string().optional(),
+  goldCraftsmanship: z.string().optional(),
+  goldDesignDescription: z.string().optional(),
+  goldFinishedType: z.string().optional(),
+  goldStones: z.string().optional(),
+  goldStoneQuality: z.string().optional(),
+
+  // Jewelry - Diamond
+  diamondType: z.string().optional(),
+  diamondShapeCut: z.string().optional(),
+  diamondColorGrade: z.string().optional(),
+  diamondClarityGrade: z.string().optional(),
+  diamondCutGrade: z.string().optional(),
+  diamondMetalDetails: z.string().optional(),
+  diamondCertification: z.string().optional(),
+  diamondOrigin: z.string().optional(),
+  diamondCaratWeight: z.string().optional(),
+  diamondDetails: z.string().optional(),
+  diamondQuantity: z.coerce.number().int().optional(),
+  diamondSize: z.string().optional(),
+  diamondWeight: z.string().optional(),
+  diamondQuality: z.string().optional(),
+
+  // Jewelry - Platinum & Silver
+  platinumType: z.string().optional(),
+  platinumWeight: z.string().optional(),
+  silverType: z.string().optional(),
+  silverWeight: z.string().optional(),
+
+  // Jewelry - General
+  jewelryType: z.string().optional(),
+  materialType: z.string().optional(),
+  metalType: z.string().optional(),
+  finish: z.string().optional(),
+  orderDuration: z.string().optional(),
+
+  // Media
+  imageUrl: z.string().optional(), // Main Image
+  images: z.array(z.any()).optional().default([]), // Gallery Images (relation)
+  videoUrl: z.string().optional(),
+
+  // Inventory & Shipping
+  sku: z.string().optional(),
+  weight: z.coerce.number().min(0).optional(),
   dimensions: z.object({
-    length: z
-      .number()
-      .min(0, 'Length must be a positive number')
-      .max(999.99, 'Length must be less than 999.99')
-      .optional(),
-    width: z
-      .number()
-      .min(0, 'Width must be a positive number')
-      .max(999.99, 'Width must be less than 999.99')
-      .optional(),
-    height: z
-      .number()
-      .min(0, 'Height must be a positive number')
-      .max(999.99, 'Height must be less than 999.99')
-      .optional(),
+    length: z.coerce.number().min(0).optional(),
+    width: z.coerce.number().min(0).optional(),
+    height: z.coerce.number().min(0).optional(),
   }).optional(),
-  
-  seo: z.object({
-    title: z
-      .string()
-      .max(60, 'SEO title must be less than 60 characters')
-      .optional(),
-    description: z
-      .string()
-      .max(160, 'SEO description must be less than 160 characters')
-      .optional(),
-    keywords: z
-      .array(z.string())
-      .max(10, 'Maximum 10 SEO keywords allowed')
-      .optional()
-      .default([]),
-    ogTitle: z
-      .string()
-      .max(60, 'OG title must be less than 60 characters')
-      .optional(),
-    ogDescription: z
-      .string()
-      .max(160, 'OG description must be less than 160 characters')
-      .optional(),
-    ogImage: z
-      .string()
-      .url('OG image must be a valid URL')
-      .optional(),
-    canonicalUrl: z
-      .string()
-      .url('Canonical URL must be a valid URL')
-      .optional(),
-    focusKeyword: z
-      .string()
-      .max(50, 'Focus keyword must be less than 50 characters')
-      .optional(),
-  }).optional(),
-  
+  minOrderQuantity: z.coerce.number().int().min(1).optional(),
+  maxOrderQuantity: z.coerce.number().int().min(1).optional(),
+
+  // SEO Meta
+  seoTitle: z.string().max(200).optional(),
+  seoDescription: z.string().max(500).optional(),
+  seoKeywords: z.string().optional(),
+  seoSlug: z.string().regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens').optional(),
+  metaDescription: z.string().optional(),
+  canonicalUrl: z.string().url().optional().or(z.literal('')),
+  robotsMeta: z.string().default('index, follow'),
+
+  // Image SEO
+  seoFriendlyImageFilename: z.string().optional(),
+  imageAltText: z.string().optional(),
+  imageTitle: z.string().optional(),
+  imageWidth: z.coerce.number().int().optional(),
+  imageHeight: z.coerce.number().int().optional(),
+  lazyLoading: z.boolean().default(true),
+
+  // Social Meta
+  ogTitle: z.string().optional(),
+  ogDescription: z.string().optional(),
+  ogImage: z.string().optional(),
+  twitterCard: z.string().optional(),
+  optimizedImageFormat: z.string().default('webp'),
+
+  // Structured Data (JSON)
+  productSchema: z.any().optional(),
+  offerSchema: z.any().optional(),
+  brandSchema: z.any().optional(),
+  breadcrumbSchema: z.any().optional(),
+  itemListSchema: z.any().optional(),
+  faqSchema: z.any().optional(),
+
+  // Legacy/Other Tags
+  tags: z.array(z.string()).default([]),
   isFeatured: z.boolean().default(false),
   isDigital: z.boolean().default(false),
   requiresShipping: z.boolean().default(true),
   trackQuantity: z.boolean().default(true),
   allowBackorder: z.boolean().default(false),
-  
-  // Promotional flags
-  isTodaysBestDeal: z.boolean().default(false),
-  isOnSale: z.boolean().default(false),
-  isFestivalOffer: z.boolean().default(false),
-  isNewLaunch: z.boolean().default(false),
-  isBestSeller: z.boolean().default(false),
-  minQuantity: z
-    .number()
-    .int('Minimum quantity must be a whole number')
-    .min(1, 'Minimum quantity must be at least 1')
-    .max(999, 'Minimum quantity must be less than 999')
-    .optional(),
-  maxQuantity: z
-    .number()
-    .int('Maximum quantity must be a whole number')
-    .min(1, 'Maximum quantity must be at least 1')
-    .max(999, 'Maximum quantity must be less than 999')
-    .optional(),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;

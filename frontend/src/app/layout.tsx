@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
+import { inter } from "./fonts";
 import "./globals.css";
 import { ReduxProvider } from "../providers/ReduxProvider";
-import VideoLoader from '../components/VideoLoader';
-
-
+import AppLayout from '../components/AppLayout';
 
 export const metadata: Metadata = {
-  title: "Celebration Diamonds Studio| Moments of Precious Craft",
-  description: "Exquisite jewelry exhibiting a diversification of cultures. Loyalty and faith are our core values.",
+  metadataBase: new URL('https://celebrationdiamonds.com'),
+  title: 'Celebration Diamonds Studio',
+  description: 'Premium handcrafted diamond jewelry and custom designs',
+  keywords: 'diamond jewelry, custom designs, engagement rings, luxury jewelry',
+  verification: {
+    google: 'your-verification-code-here',
+  },
+  alternates: {
+    canonical: 'https://celebrationdiamonds.com',
+  },
 };
 
 export default function RootLayout({
@@ -16,11 +23,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" > 
-      <body className="antialiased cabinet">
+    <html lang="en">
+      <body className={`${inter.className}`}>
         <ReduxProvider>
-          <VideoLoader />
-          {children}
+          <AppLayout>{children}</AppLayout>
         </ReduxProvider>
       </body>
     </html>

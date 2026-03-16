@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 
+
 export default function Newsletter() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -45,7 +46,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="py-24 bg-white border-t border-gray-100">
+    <section className="py-16 bg-white border-t border-gray-100">
       <div className="container mx-auto px-6 md:px-12">
 
         <div className="max-w-xl mx-auto text-center">
@@ -55,10 +56,10 @@ export default function Newsletter() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl md:text-4xl font-normal text-gray-900 mb-4 tracking-tight tan-agean">
+            <h2 className="text-2xl md:text-5xl font-semibold mb-2 tan-agean text-[#DFC97E]">
               Subscribe to our newsletter.
             </h2>
-            <p className="text-black mb-12 font-normal text-lg">
+            <p className="text-black mb-12 font-medium text-md md:text-lg">
               Receive exclusive updates, portfolio highlights, and offers.
             </p>
 
@@ -83,10 +84,10 @@ export default function Newsletter() {
                 )}
               </div>
 
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center mt-2">
                 <button
                   type="submit"
-                  className="group flex items-center gap-2 text-md uppercase font-medium text-gray-900 hover:text-black transition-colors disabled:opacity-50"
+                  className="group flex items-center gap-2 text-xl  font-medium text-gray-900 hover:text-black transition-colors disabled:opacity-50"
                   disabled={status === 'loading' || isSubmitting}
                 >
                   <span>{status === 'loading' || isSubmitting ? 'Subscribing...' : 'Subscribe'}</span>
@@ -108,9 +109,9 @@ export default function Newsletter() {
         </div>
 
         {/* Minimal Footer / Social Link */}
-        <div className="mt-32 pt-12 border-t border-gray-100  flex flex-col md:flex-row justify-between items-center text-lg text-black font-light cabinet">
-          <p className='font-medium'>Follow Us On</p>
-          <div className="flex gap-8 mt-4 md:mt-0">
+        <div className="mt-14 pt-2 border-t border-gray-100  flex flex-col md:flex-row justify-between items-center text-lg text-black font-light cabinet">
+          <p className="text-lg font-semibold tan-agean">Follow Us On</p>
+          <div className="flex gap-8 mt-4 md:mt-0 text-black font-medium">
             <a href="#" className="hover:text-black transition-colors">Instagram</a>
             <a href="#" className="hover:text-black transition-colors">Facebook</a>
             <a href="#" className="hover:text-black transition-colors">Tiktok</a>

@@ -20,7 +20,7 @@ const FOOTER_SECTIONS: FooterSection[] = [
   {
     title: "About Company",
     links: [
-      { label: "ABOUT US", href: "#" },
+      { label: "ABOUT US", href: "/about" },
       { label: "JEWELLERY GUIDE", href: "#" },
       { label: "CAREER", href: "#" },
       { label: "BLOG", href: "#" },
@@ -29,8 +29,8 @@ const FOOTER_SECTIONS: FooterSection[] = [
   {
     title: "Policies",
     links: [
-      { label: "PRIVACY POLICY", href: "#" },
-      { label: "TERMS OF USE", href: "#" },
+      { label: "PRIVACY POLICY", href: "/privacy-policy" },
+      { label: "TERMS OF USE", href: "/terms-conditions" },
     ]
   },
   {
@@ -43,10 +43,10 @@ const FOOTER_SECTIONS: FooterSection[] = [
 ];
 
 const CONTACT_INFO: ContactInfo = {
-  phone: "+977- 97230 98500",
-  email: "info@celebrationdiamon.com",
+  phone: "+977- 9709196495",
+  email: "celebrationdiamonds369@gmail.com",
   address: [
-    "NB Center, New Baneshwor",
+    "Nb Center, New Baneshwor",
     "near Sankhamul Road,",
     "Kathmandu, Nepal"
   ]
@@ -54,19 +54,19 @@ const CONTACT_INFO: ContactInfo = {
 
 export default function Footer() {
   return (
-    <footer className="bg-[#f2f2f2] pt-16 pb-8 text-gray-800 font-sans md:px-16" role="contentinfo">
+    <footer className="bg-[#C5BC9A] pt-10 pb-4 text-gray-800 font-sans md:px-16" role="contentinfo">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
           {/* Render dynamic sections */}
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <h3 className="text-sm font-bold mb-6  tan-agean">{section.title}</h3>
+              <h3 className="text-xl font-semibold mb-6 tan-agean text-black">{section.title}</h3>
               <ul className="space-y-3">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm md:text-lg font-medium text-black uppercase hover:text-amber-600 transition-colors duration-200 cabinet"
+                      className="text-md md:text-lg font-semibold leading-wide text-black uppercase hover:text-amber-600 transition-colors duration-200"
                     >
                       {link.label}
                     </Link>
@@ -78,17 +78,17 @@ export default function Footer() {
 
           {/* DIRECT CONTACT */}
           <div>
-            <h3 className="text-sm font-bold mb-6  tan-agean">Direct Contact</h3>
-            <ul className="space-y-4">
+            <h3 className="text-xl font-bold mb-6 tan-agean text-black">Direct Contact</h3>
+            <ul className="space-y-2">
               <li>
-                <p className="text-sm md:text-md font-medium text-black uppercase cabinet">{CONTACT_INFO.phone}</p>
+                <p className="text-md md:text-md font-medium text-black">{CONTACT_INFO.phone}</p>
               </li>
               <li>
-                <p className="text-sm md:text-md font-medium text-black uppercase break-all">{CONTACT_INFO.email}</p>
+                <p className="text-md md:text-md font-medium text-black break-all">{CONTACT_INFO.email}</p>
               </li>
               <li>
                 <address className="not-italic">
-                  <p className="text-sm md:text-md font-medium text-black uppercase leading-relaxed">
+                  <p className="text-md md:text-md font-medium text-black leading-relaxed">
                     {CONTACT_INFO.address.map((line, index) => (
                       <span key={index}>
                         {line}
@@ -103,8 +103,8 @@ export default function Footer() {
         </div>
 
         <div className="text-center ">
-          <p className="text-xs md:text-md text-black font-medium uppercase">
-            &copy; {new Date().getFullYear()} Celebration Diamonds. ALL RIGHTS RESERVED
+          <p className="text-xs md:text-md text-black font-extrabold tan-agean">
+            &copy; {new Date().getFullYear()} Celebration Diamonds.<br className="md:hidden " /> ALL RIGHTS RESERVED
           </p>
         </div>
       </div>

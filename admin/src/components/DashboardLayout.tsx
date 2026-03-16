@@ -2,40 +2,44 @@
 
 import { useState, useEffect, useMemo, useCallback, Fragment } from "react";
 import { motion } from "framer-motion";
-import { 
-  Home, 
-  BarChart3, 
-  TrendingUp, 
-  Package, 
-  FolderOpen, 
-  ShoppingCart, 
-  MessageSquare, 
-  Users, 
-  Star, 
-  DollarSign, 
-  FileText, 
-  Settings, 
-  UserCheck, 
-  Key, 
-  ChevronDown, 
-  ChevronRight, 
-  ChevronLeft, 
+import {
+  Home,
+  BarChart3,
+  TrendingUp,
+  Package,
+  FolderOpen,
+  ShoppingCart,
+  MessageSquare,
+  Users,
+  Star,
+  DollarSign,
+  FileText,
+  Settings,
+  UserCheck,
+  Key,
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
   ChevronUp,
-  Menu, 
-  X, 
-  Search, 
-  Bell, 
-  LogOut, 
-  Layers, 
-  SlidersHorizontal, 
-  Video, 
+  Menu,
+  X,
+  Search,
+  Bell,
+  LogOut,
+  Layers,
+  SlidersHorizontal,
+  Video,
   Info,
   Shield,
   HelpCircle,
   Gavel,
   Percent,
   Gift,
-  Mail
+  Mail,
+  MessageCircle,
+  Phone,
+  Search as SearchIcon,
+  Globe
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
@@ -80,7 +84,19 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
     icon: Users,
     children: [
       { id: "reseller-status", label: "Reseller Status", icon: UserCheck, path: "/dashboard/reseller-status" },
-      { id: "reseller-messages", label: "Messages", icon: MessageSquare, path: "/dashboard/reseller-messages" }
+      { id: "reseller-messages", label: "Messages", icon: MessageSquare, path: "/dashboard/reseller-messages" },
+      { id: "chats", label: "Chats", icon: MessageCircle, path: "/dashboard/chats" },
+      { id: "appointments", label: "Appointments", icon: Phone, path: "/dashboard/appointments" }
+    ]
+  },
+  {
+    id: "seo",
+    label: "SEO Management",
+    icon: SearchIcon,
+    children: [
+      { id: "sitemap", label: "Sitemap", icon: Globe, path: "/dashboard/seo/sitemap" },
+      { id: "robots", label: "Robots.txt", icon: Shield, path: "/dashboard/seo/robots" },
+      { id: "jsonld", label: "JSON-LD", icon: Shield, path: "/dashboard/seo/jsonld" }
     ]
   },
   {
@@ -121,7 +137,7 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
     children: [
       { id: "site-settings", label: "Site Settings", icon: Settings, path: "/dashboard/settings" },
       { id: "users", label: "User Configuration", icon: UserCheck, path: "/dashboard/users" },
-      { id: "password", label: "Password Management", icon: Key, path: "/dashboard/settings/password" }
+      { id: "password", label: "Profile Management", icon: Key, path: "/dashboard/settings/password" }
     ]
   }
 ];
@@ -129,7 +145,7 @@ const NAVIGATION_ITEMS: NavigationItem[] = [
 // Create a map of routes for quick lookup
 const ROUTE_MAP = (() => {
   const map: Record<string, string> = {};
-  
+
   NAVIGATION_ITEMS.forEach(item => {
     if (item.path) {
       map[item.id] = item.path;
@@ -149,7 +165,7 @@ const ROUTE_MAP = (() => {
       });
     }
   });
-  
+
   return map;
 })();
 
@@ -254,7 +270,7 @@ export default function DashboardLayout({
 
   // Navigation component for better organization
   const Navigation = useMemo(() => (
-    <nav className="flex-1 overflow-y-auto px-3 py-6 custom-scrollbar" style={{
+    <nav className="flex-1 overflow-y-auto px-3 py-3 custom-scrollbar" style={{
       maxHeight: 'calc(100vh - 8rem)' // Account for header and footer
     }}>
       <div className="space-y-1">
@@ -274,13 +290,11 @@ export default function DashboardLayout({
                     handleNavigation(item.id);
                   }
                 }}
-                className={`w-full flex items-center justify-between px-3 py-3 font-medium text-2xl rounded-lg transition-colors ${isActive
-                    ? 'bg-blue-50 text-black border-r-2 border-blue-700'
-                    : 'text-black hover:bg-gray-50'
+                className={`w-full  flex items-center justify-between px-3 py-3 font-medium text-2xl rounded-lg transition-colors  hover:bg-gray-50'
                   }`}
               >
                 <div className="flex items-center min-w-0 flex-1">
-                  <Icon className="w-5 h-5 mr-5 flex-shrink-0" />
+                  <Icon className="w-5 h-5 mr-5 flex-shrink-0 text-black" />
                   {!isCollapsed && (
                     <span className="truncate text-xl text-black">
                       {item.label}
@@ -289,7 +303,7 @@ export default function DashboardLayout({
                 </div>
                 {!isCollapsed && hasChildren && (
                   <div
-                    className="flex-shrink-0 ml-2"
+                    className="flex-shrink-0 ml-2 "
                     style={{ transform: `rotate(${isExpanded ? 90 : 0}deg)` }}
                   >
                     <ChevronRight className="w-4 h-4" />
@@ -299,7 +313,7 @@ export default function DashboardLayout({
 
               {hasChildren && isExpanded && !isCollapsed && (
                 <div className="relative ml-6 mt-1 space-y-1">
-                  <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300"></div>
+                  <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300 "></div>
 
                   {item.children!.map((child) => {
                     const ChildIcon = child.icon || Fragment;
@@ -309,7 +323,7 @@ export default function DashboardLayout({
 
                     return (
                       <div key={child.id} className="relative">
-                        <div className="absolute left-0 top-1/2 w-6 h-3 transform -translate-y-1/2 border-l-2 border-b-2 border-gray-300 rounded-bl-2xl"></div>
+                        <div className="absolute left-0 top-1/2 w-6 h-2 transform -translate-y-1/2 border-l-2 border-b-2 border-gray-300 rounded-bl-2xl"></div>
 
                         <button
                           onClick={() => {
@@ -319,9 +333,9 @@ export default function DashboardLayout({
                               handleNavigation(child.id, item.id);
                             }
                           }}
-                          className={`w-full flex items-center pl-8 pr-3 py-3 font-medium rounded-lg transition-colors relative ${isChildActive
-                              ? 'bg-blue-50 text-black'
-                              : 'text-black hover:bg-gray-50'
+                          className={`w-48 flex items-center ml-8 pr-3 px-8 py-2 font-medium rounded-lg transition-colors relative ${isChildActive
+                            ? 'bg-[#DEE0E0] text-black'
+                            : 'text-black hover:bg-[#EBEFF3]'
                             }`}
                         >
                           <ChildIcon className="w-4 h-4 mr-3 flex-shrink-0" />
@@ -346,13 +360,13 @@ export default function DashboardLayout({
 
                               return (
                                 <div key={grandChild.id} className="relative">
-                                  <div className="absolute left-0 top-1/2 w-6 h-3 transform -translate-y-1/2 border-l-2 border-b-2 border-gray-300 rounded-bl-2xl"></div>
+                                  <div className="absolute left-0 top-1/2 w-6 h-3 transform -translate-y-1/2 border-l-2 border-b-2 border-gray-300  rounded-bl-2xl"></div>
 
                                   <button
                                     onClick={() => handleNavigation(grandChild.id, child.id)}
-                                    className={`w-full flex items-center pl-8 pr-3 py-3 font-medium rounded-lg transition-colors relative ${isGrandChildActive
-                                        ? 'bg-blue-50 text-black'
-                                        : 'text-black hover:bg-gray-50'
+                                    className={`w-full flex items-center pl-8 pr-3 py-3 font-medium rounded-lg transition-colors bg-red-300 relative ${isGrandChildActive
+                                      ? 'bg-blue-50 text-black'
+                                      : 'text-black hover:bg-gray-50'
                                       }`}
                                   >
                                     <GrandChildIcon className="w-3 h-3 mr-3 flex-shrink-0" />
@@ -444,7 +458,7 @@ export default function DashboardLayout({
         </div>
 
         {/* Main content */}
-        <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-[#fffefe] ">
           {/* Top bar */}
           <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
             <div className="flex items-center justify-between h-16 px-4 sm:px-6">
@@ -452,8 +466,8 @@ export default function DashboardLayout({
                 <button
                   onClick={() => setSidebarOpen(!sidebarOpen)}
                   className={`lg:hidden p-2 rounded-md transition-colors ${sidebarOpen
-                      ? 'text-black bg-blue-50 hover:bg-blue-100'
-                      : 'text-black hover:bg-gray-100'
+                    ? 'text-black bg-blue-50 hover:bg-blue-100'
+                    : 'text-black hover:bg-gray-100'
                     }`}
                 >
                   {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

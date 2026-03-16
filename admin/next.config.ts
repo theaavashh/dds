@@ -39,7 +39,15 @@ const nextConfig: NextConfig = {
         port: '5000',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.celebrationdiamon.com',
+        pathname: '/uploads/**',
+      },
     ],
+  },
+  turbopack: {
+    root: __dirname,
   },
   env: {
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,

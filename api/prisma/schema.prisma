@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,7 +9,6 @@ datasource db {
 
 model Admin {
   id         String      @id @default(cuid())
-  fullname   String
   username   String      @unique
   email      String      @unique
   password   String
@@ -20,14 +16,17 @@ model Admin {
   isActive   Boolean     @default(true)
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
+  fullname   String
   adminRoles AdminRole[]
+  chatConversations ChatConversation[]
+  resellers  Reseller[]
 }
 
 model Role {
   id          String      @id @default(cuid())
-  name        String      @unique // e.g., "admin", "manager", "editor", "viewer"
+  name        String      @unique
   description String?
-  permissions String? // JSON string of permissions
+  permissions String?
   isActive    Boolean     @default(true)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -40,91 +39,135 @@ model AdminRole {
   id        String   @id @default(cuid())
   adminId   String
   roleId    String
+  createdAt DateTime @default(now())
   admin     Admin    @relation(fields: [adminId], references: [id], onDelete: Cascade)
   role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
 
   @@unique([adminId, roleId])
   @@map("admin_roles")
 }
 
 model Product {
-  id               String         @id @default(cuid())
-  productCode      String         @unique // CD-001, etc.
-  name             String
-  description      String
-  fullDescription  String? // Full detailed description (HTML content)
-  category         String // Ring, Necklace, etc.
-  subCategory      String? // Ladies/Casual, etc.
-  price            Float
-  imageUrl         String? // Main image URL (kept for backward compatibility)
-  stock            Int            @default(0)
-  isActive         Boolean        @default(true)
-  status           String         @default("draft") // "draft", "active", "inactive"
-  videoUrl         String? // Video URL for product demonstration
+  id                    String         @id @default(cuid())
+  productCode           String         @unique
+  name                  String
+  description           String
+  category              String
+  subCategory           String?
+  price                 Float
+  comparePrice          Float?
+  costPrice             Float?
+  discountPrice         Float?
+  discountPercentage    Float?
+  imageUrl              String?
+  stock                 Int            @default(0)
+  isActive              Boolean        @default(true)
+  goldWeight            String?
+  diamondDetails        String?
+  diamondQuantity       Int?
+  diamondSize           String?
+  diamondWeight         String?
+  diamondQuality        String?
+  orderDuration         String?
+  metalType             String?
+  finish                String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  digitalBrowser        Boolean        @default(false)
+  distributor           Boolean        @default(false)
+  website               Boolean        @default(false)
+  culture               String?
+  fullDescription       String?
+  seoDescription        String?
+  seoKeywords           String?
+  seoSlug               String?
+  seoTitle              String?
+  videoUrl              String?
+  status                String         @default("draft")
+  jewelryType           String?
+  materialType          String?
+  silverWeight          String?
+  diamondCaratWeight    String?
+  diamondCertification  String?
+  diamondClarityGrade   String?
+  diamondColorGrade     String?
+  diamondCutGrade       String?
+  diamondMetalDetails   String?
+  diamondOrigin         String?
+  diamondShapeCut       String?
+  diamondType           String?
+  goldCraftsmanship     String?
+  goldDesignDescription String?
+  goldFinishedType      String?
+  goldPurity            String?
+  goldStoneQuality      String?
+  goldStones            String?
+  goldType              String?
+  platinumType          String?
+  platinumWeight        String?
+  silverType            String?
+  normalUser            Boolean        @default(false)
+  resellerUser          Boolean        @default(false)
 
-  // Gold Fields
-  goldWeight         String? // 4 gms approx
-  goldPurity         String? // Gold purity (e.g., 14k, 18k, 22k)
-  goldType           String? // Gold type (e.g., Yellow, White, Rose)
-  goldCraftsmanship  String? // Craftsmanship details
-  goldDesignDescription String? // Design description
-  goldFinishedType   String? // Finished type
-  goldStones         String? // Stones used
-  goldStoneQuality   String? // Stone quality
+  // Inventory & SKU Fields
+  sku                   String?
+  weight                Float?
+  dimensions            Json?
+  minOrderQuantity      Int?
+  maxOrderQuantity      Int?
+  stoneWeight           String?
+  caret                 String?
 
-  // Diamond Fields
-  diamondType        String? // Diamond type
-  diamondShapeCut    String? // Shape and cut
-  diamondColorGrade  String? // Color grade
-  diamondClarityGrade String? // Clarity grade
-  diamondCutGrade    String? // Cut grade
-  diamondMetalDetails String? // Metal details
-  diamondCertification String? // Certification
-  diamondOrigin      String? // Origin
-  diamondCaratWeight String? // Carat weight
-  diamondDetails     String? // -
-  diamondQuantity    Int? // number of diamonds
-  diamondSize        String? // size of diamonds
-  diamondWeight      String? // weight of diamonds
-  diamondQuality     String? // quality of diamonds
+  // Feature Flags
+  isFeatured            Boolean        @default(false)
+  isDigital             Boolean        @default(false)
+  requiresShipping      Boolean        @default(true)
+  trackQuantity         Boolean        @default(true)
+  allowBackorder        Boolean        @default(false)
+  xmlSitemap            Boolean        @default(false)
 
-  // Platinum Fields
-  platinumWeight      String? // Weight
-  platinumType       String? // Type
+  // Additional Content Fields
+  indexingAndDiscovery  String?
+  contentElement        String?
+  faqs                  String?
+  tags                  String[]       @default([])
 
-  // Silver Fields
-  silverWeight       String? // Weight
-  silverType         String? // Type
+  // SEO Fields
+  metaDescription       String?
+  canonicalUrl          String?
+  robotsMeta            String? @default("index, follow")
+  
+  // Image SEO Fields
+  seoFriendlyImageFilename String?
+  imageAltText          String?
+  imageTitle            String?
+  imageWidth            Int?
+  imageHeight           Int?
+  lazyLoading           Boolean @default(true)
+  
+  // Structured Data Fields
+  productSchema         Json?
+  offerSchema           Json?
+  brandSchema           Json?
+  breadcrumbSchema      Json?
+  itemListSchema        Json?
+  faqSchema             Json?
+  
+  // Social Meta Fields
+  ogTitle               String?
+  ogDescription         String?
+  ogImage               String?
+  twitterCard           String?
+  twitterTitle          String?
+  twitterDescription    String?
+  twitterImage          String?
+  
+  // Performance Fields
+  optimizedImageFormat  String? @default("webp")
 
-  // Additional fields
-  orderDuration      String? // 7 days to make
-  jewelryType        String? // type of jewelry
-  materialType       String? // material type (14k, 18k, etc.)
-  metalType          String? // 14k, 18k, etc.
-  finish             String? // Polished, Matte, etc.
-
-  // Distribution channels
-  digitalBrowser Boolean @default(false)
-  website        Boolean @default(false)
-  distributor    Boolean @default(false)
-  normalUser     Boolean @default(false)
-  resellerUser   Boolean @default(false)
-
-  // Cultural field
-  culture String? // Newari, Brahmin/Chhetri, Tamang, etc.
-
-  // SEO fields
-  seoTitle       String? // Meta title
-  seoDescription String? // Meta description
-  seoKeywords    String? // Meta keywords
-  seoSlug        String? // URL slug
-
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  images        ProductImage[]
-  savedProducts SavedProduct[]
-  reviews       Review[]
+  images                ProductImage[]
+  reviews               Review[]
+  savedProducts         SavedProduct[]
 
   @@map("products")
 }
@@ -132,13 +175,13 @@ model Product {
 model ProductImage {
   id        String   @id @default(cuid())
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   url       String
   altText   String?
   order     Int      @default(0)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("product_images")
 }
@@ -147,7 +190,7 @@ model Collection {
   id            String         @id @default(cuid())
   name          String
   description   String?
-  userId        String // Simple user identifier (could be session ID or user ID)
+  userId        String
   isPublic      Boolean        @default(false)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
@@ -159,28 +202,28 @@ model Collection {
 model SavedProduct {
   id           String     @id @default(cuid())
   productId    String
-  product      Product    @relation(fields: [productId], references: [id])
   collectionId String
-  collection   Collection @relation(fields: [collectionId], references: [id])
   savedAt      DateTime   @default(now())
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  product      Product    @relation(fields: [productId], references: [id])
 
   @@unique([productId, collectionId])
   @@map("saved_products")
 }
 
 model Category {
-  id          String   @id @default(cuid())
-  title       String
-  iconUrl     String?  // Icon URL field
-  imageUrl    String?  // Image URL field
-  desktopBreadcrumbUrl String? // Desktop Breadcrumb Image
-  mobileBreadcrumbUrl  String? // Mobile Breadcrumb Image
-  link        String?
-  isActive    Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  subcategories Subcategory[]
+  id                   String        @id @default(cuid())
+  title                String
+  imageUrl             String?
+  link                 String?
+  isActive             Boolean       @default(true)
+  sortOrder            Int           @default(0)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  iconUrl              String?
+  desktopBreadcrumbUrl String?
+  mobileBreadcrumbUrl  String?
+  subcategories        Subcategory[]
 
   @@map("categories")
 }
@@ -189,36 +232,36 @@ model Subcategory {
   id         String   @id @default(cuid())
   name       String
   categoryId String
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   isActive   Boolean  @default(true)
   sortOrder  Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@map("subcategories")
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  name      String   // Reviewer name
-  email     String   // Reviewer email
-  rating    Int      // Rating (1-5)
-  title     String   // Review title
-  comment   String   // Review comment
-  isVerified Boolean  @default(false) // Whether the reviewer purchased the product
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  productId  String
+  rating     Int
+  comment    String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  email      String
+  isVerified Boolean  @default(false)
+  name       String
+  title      String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("reviews")
 }
 
 model AttributeOption {
   id        String   @id @default(cuid())
-  attribute String   // The attribute name (e.g., "diamondType", "goldPurity")
-  value     String   // The option value (e.g., "Lab", "Natural", "18k")
+  attribute String
+  value     String
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -238,27 +281,27 @@ model SiteSetting {
 
 model HeroSection {
   id              String   @id @default(cuid())
-  desktopImageUrl String?
-  mobileImageUrl  String?
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  desktopImageUrl String?
+  mobileImageUrl  String?
 
   @@map("hero_sections")
 }
 
 model JewelryShowcase {
-  id          String   @id @default(cuid())
-  title       String?
-  quote1      String?
-  quote2      String?
-  quote3      String?
-  buttonText  String?
-  leftImage   String?
-  rightImage  String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  title      String?
+  quote1     String?
+  quote2     String?
+  quote3     String?
+  buttonText String?
+  leftImage  String?
+  rightImage String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@map("jewelry_showcases")
 }
@@ -274,17 +317,17 @@ model NewsletterSubscription {
 }
 
 model Testimonial {
-  id         String   @id @default(cuid())
-  clientName String
+  id          String   @id @default(cuid())
+  clientName  String
   clientTitle String?
-  company    String?
-  content    String
-  rating     Int?
-  imageUrl   String?
-  isActive   Boolean  @default(true)
-  sortOrder  Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  company     String?
+  content     String
+  rating      Int?
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("testimonials")
 }
@@ -336,201 +379,74 @@ model Banner {
 }
 
 model AboutPage {
-  id         String   @id @default(cuid())
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  // Relations
-  heroSection        AboutHeroSection?
-  heritageSection    AboutHeritageSection?
-  beyondSparkle      AboutBeyondSparkle?
-  celebrations       AboutCelebrations?
-  gemologist         AboutGemologist?
-  knowledge          AboutKnowledge?
-  promise            AboutPromise?
-  brandPromise       AboutBrandPromise?
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  ctaLink     String?
+  ctaTitle    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("about_pages")
 }
 
-model AboutHeroSection {
-  id          String   @id @default(cuid())
-  aboutPageId String   @unique
-  title       String
-  subtitle    String
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
-
-  @@map("about_hero_sections")
-}
-
-model AboutHeritageSection {
-  id          String   @id @default(cuid())
-  aboutPageId String   @unique
-  title       String
-  content     String   // JSON array of paragraphs
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
-
-  @@map("about_heritage_sections")
-}
-
-model AboutBeyondSparkle {
-  id          String   @id @default(cuid())
-  aboutPageId String   @unique
-  title       String
-  subtitle    String
-  items       String   // JSON array of {title, description, icon}
-  footerText  String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
-
-  @@map("about_beyond_sparkles")
-}
-
-model AboutCelebrations {
-  id          String   @id @default(cuid())
-  aboutPageId String   @unique
-  title       String
-  content     String   // JSON array of paragraphs
-  collections String   // JSON array of collection names
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
-
-  @@map("about_celebrations")
-}
-
-model AboutGemologist {
-  id          String   @id @default(cuid())
-  aboutPageId String   @unique
-  name        String
-  title       String
-  company     String
-  expertise   String   // JSON array of expertise points
-  messageTitle String
-  message     String   // JSON array of message paragraphs
-  signature   String
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
-
-  @@map("about_gemologists")
-}
-
-model AboutKnowledge {
-  id          String   @id @default(cuid())
-  aboutPageId String   @unique
-  title       String
-  subtitle    String
-  content     String   // JSON array of paragraphs
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
-
-  @@map("about_knowledge")
-}
-
-model AboutPromise {
-  id          String   @id @default(cuid())
-  aboutPageId String   @unique
-  title       String
-  promises    String   // JSON array of promise strings
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
-
-  @@map("about_promises")
-}
-
-model AboutBrandPromise {
-  id          String   @id @default(cuid())
-  aboutPageId String   @unique
-  brandName   String
-  tagline     String
-  buttonText  String
-  buttonLink  String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  aboutPage AboutPage @relation(fields: [aboutPageId], references: [id], onDelete: Cascade)
-
-  @@map("about_brand_promises")
-}
-
-model PrivacyPolicy {
-  id         String   @id @default(cuid())
-  title      String
-  content    String   // HTML content
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@map("privacy_policies")
-}
-
-model TermsOfUse {
-  id         String   @id @default(cuid())
-  title      String
-  content    String   // HTML content
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@map("terms_of_use")
-}
-
 model Distributor {
-  id            String    @id @default(cuid())
-  companyName   String?
-  firstName     String
-  lastName      String
-  email         String    @unique
-  password      String
-  phone         String
-  city          String
-  country       String
-  status        String    @default("pending") // "pending", "approved", "rejected", "blocked"
-  totalOrders   Int       @default(0)
-  totalRevenue  Float     @default(0)
-  lastLogin     DateTime?
-  inquiries     Inquiry[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  companyName  String?
+  firstName    String
+  lastName     String
+  email        String    @unique
+  password     String
+  phone        String
+  city         String
+  country      String
+  status       String    @default("pending")
+  totalOrders  Int       @default(0)
+  totalRevenue Float     @default(0)
+  lastLogin    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  inquiries    Inquiry[]
+  chatConversations ChatConversation[]
 
   @@map("distributors")
 }
 
+model Reseller {
+  id           String    @id @default(cuid())
+  companyName  String?
+  firstName    String
+  lastName     String
+  email        String    @unique
+  password     String
+  phone        String
+  city         String
+  country      String
+  status       String    @default("pending")
+  commissionRate Float    @default(0.10) // 10% default commission
+  totalOrders  Int       @default(0)
+  totalRevenue Float     @default(0)
+  lastLogin    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  createdBy    String    // Admin ID who created this reseller
+  creator      Admin     @relation(fields: [createdBy], references: [id])
+
+  @@map("resellers")
+}
+
 model Inquiry {
   id            String        @id @default(cuid())
-  inquiryNumber String        @unique // INQ-1001, etc.
+  inquiryNumber String        @unique
   distributorId String
-  distributor   Distributor   @relation(fields: [distributorId], references: [id])
-  status        String        @default("pending") // "pending", "contacted", "closed", "cancelled"
+  status        String        @default("pending")
   totalItems    Int
   notes         String?
-  items         InquiryItem[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  distributor   Distributor   @relation(fields: [distributorId], references: [id])
+  items         InquiryItem[]
 
   @@map("inquiries")
 }
@@ -538,7 +454,6 @@ model Inquiry {
 model InquiryItem {
   id          String  @id @default(cuid())
   inquiryId   String
-  inquiry     Inquiry @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
   productId   String
   productCode String
   name        String
@@ -546,7 +461,8 @@ model InquiryItem {
   quantity    Int
   goldWeight  String?
   goldPurity  String?
-  price       Float? // Price at the time of inquiry (if known)
+  price       Float?
+  inquiry     Inquiry @relation(fields: [inquiryId], references: [id], onDelete: Cascade)
 
   @@map("inquiry_items")
 }
@@ -577,10 +493,114 @@ model CatalogItem {
 
 model LowerBanner {
   id        String   @id @default(cuid())
-  position  Int      @unique // 1 for left banner, 2 for right banner
+  position  Int      @unique
   imageUrl  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("lower_banners")
+}
+
+model ChatConversation {
+  id            String   @id @default(cuid())
+  distributorId String
+  adminId       String?
+  lastMessageAt DateTime @default(now())
+  status        String   @default("active") // active, closed, archived
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  distributor   Distributor @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+  admin         Admin?       @relation(fields: [adminId], references: [id])
+  messages      ChatMessage[]
+
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id             String   @id @default(cuid())
+  conversationId String
+  senderId       String
+  senderType     String   // admin, distributor
+  content        String
+  messageType    String   @default("text") // text, image, file
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+model SitemapEntry {
+  id           String   @id @default(cuid())
+  url          String
+  lastModified DateTime @default(now())
+  changeFreq   String   @default("weekly") // always, hourly, daily, weekly, monthly, yearly, never
+  priority     Float    @default(0.8)
+  status       String   @default("active") // active, inactive, error
+  pageType     String   @default("custom") // product, category, page, blog, custom
+  title        String?
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("sitemap_entries")
+}
+
+model SitemapConfig {
+  id                 String   @id @default(cuid())
+  autoGenerate       Boolean  @default(true)
+  includeProducts    Boolean  @default(true)
+  includeCategories  Boolean  @default(true)
+  includePages       Boolean  @default(true)
+  defaultChangeFreq  String   @default("weekly")
+  defaultPriority    Float    @default(0.8)
+  lastGenerated      DateTime?
+  urlCount           Int      @default(0)
+  excludedUrls       String[] @default([])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("sitemap_config")
+}
+
+model RobotsRule {
+  id          String   @id @default(cuid())
+  userAgent   String   @default("*")
+  allow       String[] @default([])
+  disallow    String[] @default([])
+  crawlDelay  Int?
+  isActive    Boolean  @default(true)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("robots_rules")
+}
+
+model RobotsConfig {
+  id           String   @id @default(cuid())
+  enabled      Boolean  @default(true)
+  autoGenerate Boolean  @default(false)
+  sitemapUrl   String?
+  hostUrl      String?
+  lastUpdated  DateTime?
+  content      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("robots_config")
+}
+
+model JsonLdSchema {
+  id        String   @id @default(cuid())
+  type      String
+  name      String
+  content   String
+  pageType  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("jsonld_schemas")
 }

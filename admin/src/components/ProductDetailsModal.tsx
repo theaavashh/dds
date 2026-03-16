@@ -2,9 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lato } from 'next/font/google';
 
-const lato = Lato({ subsets: ['latin'], display: 'swap', weight: ['400','700'] });
 import Image from "next/image";
 import {
   X,
@@ -132,8 +130,8 @@ export default function ProductDetailsModal({
   };
 
   const getStatusColor = (isActive: boolean) => {
-    return isActive 
-      ? 'bg-green-100 text-green-800 border-green-200' 
+    return isActive
+      ? 'bg-green-100 text-green-800 border-green-200'
       : 'bg-red-100 text-red-800 border-red-200';
   };
 
@@ -155,11 +153,11 @@ export default function ProductDetailsModal({
         >
           {/* Backdrop */}
           <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-          
+
           {/* Modal */}
           <div className="relative min-h-screen flex items-center justify-center p-4">
             <motion.div
-              className={`relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden ${lato.className}`}
+              className="relative bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -176,7 +174,7 @@ export default function ProductDetailsModal({
                     <p className="text-sm text-black">SKU: {product.sku || 'N/A'}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   {/* Action Buttons */}
                   {onEdit && (
@@ -188,7 +186,7 @@ export default function ProductDetailsModal({
                       Edit
                     </button>
                   )}
-                  
+
                   {onDelete && (
                     <button
                       onClick={() => onDelete(product.id)}
@@ -198,7 +196,7 @@ export default function ProductDetailsModal({
                       Delete
                     </button>
                   )}
-                  
+
                   <button
                     onClick={onClose}
                     className="p-2 text-black hover:text-black hover:bg-gray-100 rounded-lg transition-colors"
@@ -219,7 +217,7 @@ export default function ProductDetailsModal({
                         <ImageIcon className="w-5 h-5 mr-2" />
                         Product Images
                       </h3>
-                      
+
                       {product.images && product.images.length > 0 ? (
                         <div className="space-y-4">
                           {/* Main Image */}
@@ -231,7 +229,7 @@ export default function ProductDetailsModal({
                               className="object-cover"
                             />
                           </div>
-                          
+
                           {/* Thumbnail Images */}
                           {product.images.length > 1 && (
                             <div className="grid grid-cols-4 gap-2">
@@ -239,11 +237,10 @@ export default function ProductDetailsModal({
                                 <button
                                   key={index}
                                   onClick={() => setActiveImageIndex(index)}
-                                  className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-colors ${
-                                    index === activeImageIndex
-                                      ? 'border-purple-500'
-                                      : 'border-gray-200 hover:border-gray-300'
-                                  }`}
+                                  className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-colors ${index === activeImageIndex
+                                    ? 'border-purple-500'
+                                    : 'border-gray-200 hover:border-gray-300'
+                                    }`}
                                 >
                                   <Image
                                     src={image}
@@ -272,7 +269,7 @@ export default function ProductDetailsModal({
                         <FileText className="w-5 h-5 mr-2" />
                         Basic Information
                       </h3>
-                      
+
                       <div className="space-y-3">
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Status</span>
@@ -281,22 +278,22 @@ export default function ProductDetailsModal({
                             <span className="ml-1">{product.isActive ? 'Active' : 'Inactive'}</span>
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Category</span>
                           <span className="text-sm text-gray-900">{categoryName}</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Stock</span>
                           <span className="text-sm text-gray-900">{product.stock || 0} units</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Weight</span>
                           <span className="text-sm text-gray-900">{product.weight || 0} lbs</span>
                         </div>
-                        
+
                         {product.dimensions && (
                           <div className="flex items-center justify-between py-2 border-b border-gray-100">
                             <span className="text-sm font-medium text-gray-600">Dimensions</span>
@@ -317,7 +314,7 @@ export default function ProductDetailsModal({
                         <DollarSign className="w-5 h-5 mr-2" />
                         Pricing
                       </h3>
-                      
+
                       <div className="space-y-3">
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Price</span>
@@ -325,7 +322,7 @@ export default function ProductDetailsModal({
                             {formatCurrency(Number(product.price) || 0)}
                           </span>
                         </div>
-                        
+
                         {product.comparePrice && Number(product.comparePrice) > 0 && (
                           <div className="flex items-center justify-between py-2 border-b border-gray-100">
                             <span className="text-sm font-medium text-gray-600">Compare Price</span>
@@ -334,7 +331,7 @@ export default function ProductDetailsModal({
                             </span>
                           </div>
                         )}
-                        
+
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Taxable</span>
                           <span className="text-sm text-gray-900">
@@ -350,7 +347,7 @@ export default function ProductDetailsModal({
                         <Zap className="w-5 h-5 mr-2" />
                         Features
                       </h3>
-                      
+
                       <div className="grid grid-cols-2 gap-3">
                         <div className={`flex items-center p-3 rounded-lg ${product.isFeatured ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50 border border-gray-200'}`}>
                           <Award className={`w-4 h-4 mr-2 ${product.isFeatured ? 'text-yellow-600' : 'text-gray-400'}`} />
@@ -358,21 +355,21 @@ export default function ProductDetailsModal({
                             Featured
                           </span>
                         </div>
-                        
+
                         <div className={`flex items-center p-3 rounded-lg ${product.isDigital ? 'bg-blue-50 border border-blue-200' : 'bg-gray-50 border border-gray-200'}`}>
                           <Globe className={`w-4 h-4 mr-2 ${product.isDigital ? 'text-blue-600' : 'text-gray-400'}`} />
                           <span className={`text-sm font-medium ${product.isDigital ? 'text-blue-800' : 'text-gray-600'}`}>
                             Digital
                           </span>
                         </div>
-                        
+
                         <div className={`flex items-center p-3 rounded-lg ${product.isNew ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
                           <Star className={`w-4 h-4 mr-2 ${product.isNew ? 'text-green-600' : 'text-gray-400'}`} />
                           <span className={`text-sm font-medium ${product.isNew ? 'text-green-800' : 'text-gray-600'}`}>
                             New
                           </span>
                         </div>
-                        
+
                         <div className={`flex items-center p-3 rounded-lg ${product.isOnSale ? 'bg-red-50 border border-red-200' : 'bg-gray-50 border border-gray-200'}`}>
                           <TrendingUp className={`w-4 h-4 mr-2 ${product.isOnSale ? 'text-red-600' : 'text-gray-400'}`} />
                           <span className={`text-sm font-medium ${product.isOnSale ? 'text-red-800' : 'text-gray-600'}`}>
@@ -388,7 +385,7 @@ export default function ProductDetailsModal({
                         <Truck className="w-5 h-5 mr-2" />
                         Shipping & Logistics
                       </h3>
-                      
+
                       <div className="space-y-3">
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Requires Shipping</span>
@@ -396,14 +393,14 @@ export default function ProductDetailsModal({
                             {product.requiresShipping ? 'Yes' : 'No'}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Free Shipping</span>
                           <span className="text-sm text-gray-900">
                             {product.freeShipping ? 'Yes' : 'No'}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Visibility</span>
                           <span className="text-sm text-gray-900">
@@ -420,7 +417,7 @@ export default function ProductDetailsModal({
                           <Award className="w-5 h-5 mr-2" />
                           Diamond Details
                         </h3>
-                        
+
                         <div className="space-y-3">
                           {product.diamondDetails && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
@@ -428,28 +425,28 @@ export default function ProductDetailsModal({
                               <span className="text-sm text-gray-900">{product.diamondDetails}</span>
                             </div>
                           )}
-                          
+
                           {product.diamondQuantity !== undefined && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Quantity</span>
                               <span className="text-sm text-gray-900">{product.diamondQuantity}</span>
                             </div>
                           )}
-                          
+
                           {product.diamondSize && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Size</span>
                               <span className="text-sm text-gray-900">{product.diamondSize}</span>
                             </div>
                           )}
-                          
+
                           {product.diamondWeight && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Weight</span>
                               <span className="text-sm text-gray-900">{product.diamondWeight}</span>
                             </div>
                           )}
-                          
+
                           {product.diamondQuality && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Quality</span>
@@ -467,7 +464,7 @@ export default function ProductDetailsModal({
                           <Package className="w-5 h-5 mr-2" />
                           Other Details
                         </h3>
-                        
+
                         <div className="space-y-3">
                           {product.caret && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
@@ -475,70 +472,70 @@ export default function ProductDetailsModal({
                               <span className="text-sm text-gray-900">{product.caret}</span>
                             </div>
                           )}
-                          
+
                           {product.stoneWeight && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Stone Weight</span>
                               <span className="text-sm text-gray-900">{product.stoneWeight}</span>
                             </div>
                           )}
-                          
+
                           {product.otherGemstones && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Other Gemstones</span>
                               <span className="text-sm text-gray-900">{product.otherGemstones}</span>
                             </div>
                           )}
-                          
+
                           {product.metalType && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Metal Type</span>
                               <span className="text-sm text-gray-900">{product.metalType}</span>
                             </div>
                           )}
-                          
+
                           {product.stoneType && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Stone Type</span>
                               <span className="text-sm text-gray-900">{product.stoneType}</span>
                             </div>
                           )}
-                          
+
                           {product.settingType && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Setting Type</span>
                               <span className="text-sm text-gray-900">{product.settingType}</span>
                             </div>
                           )}
-                          
+
                           {product.size && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Size</span>
                               <span className="text-sm text-gray-900">{product.size}</span>
                             </div>
                           )}
-                          
+
                           {product.color && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Color</span>
                               <span className="text-sm text-gray-900">{product.color}</span>
                             </div>
                           )}
-                          
+
                           {product.finish && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Finish</span>
                               <span className="text-sm text-gray-900">{product.finish}</span>
                             </div>
                           )}
-                          
+
                           {product.orderDuration && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Order Duration</span>
                               <span className="text-sm text-gray-900">{product.orderDuration}</span>
                             </div>
                           )}
-                          
+
                           {product.culture && (
                             <div className="flex items-center justify-between py-2 border-b border-gray-100">
                               <span className="text-sm font-medium text-gray-600">Culture</span>
@@ -556,18 +553,18 @@ export default function ProductDetailsModal({
                           <Search className="w-5 h-5 mr-2" />
                           SEO Information
                         </h3>
-                        
+
                         <div className="space-y-3">
                           <div>
                             <span className="text-sm font-medium text-gray-600 block mb-1">SEO Title</span>
                             <p className="text-sm text-gray-900">{product.seo.title || 'Not set'}</p>
                           </div>
-                          
+
                           <div>
                             <span className="text-sm font-medium text-gray-600 block mb-1">SEO Description</span>
                             <p className="text-sm text-gray-900">{product.seo.description || 'Not set'}</p>
                           </div>
-                          
+
                           {product.seo.keywords && product.seo.keywords.length > 0 && (
                             <div>
                               <span className="text-sm font-medium text-gray-600 block mb-1">Keywords</span>
@@ -593,13 +590,13 @@ export default function ProductDetailsModal({
                         <Clock className="w-5 h-5 mr-2" />
                         Timestamps
                       </h3>
-                      
+
                       <div className="space-y-3">
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Created</span>
                           <span className="text-sm text-gray-900">{formatDate(product.createdAt)}</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between py-2 border-b border-gray-100">
                           <span className="text-sm font-medium text-gray-600">Last Updated</span>
                           <span className="text-sm text-gray-900">{formatDate(product.updatedAt)}</span>
@@ -616,7 +613,7 @@ export default function ProductDetailsModal({
                       <FileText className="w-5 h-5 mr-2" />
                       Description
                     </h3>
-                    
+
                     <div className="space-y-4">
                       {product.shortDescription && (
                         <div>
@@ -626,7 +623,7 @@ export default function ProductDetailsModal({
                           </p>
                         </div>
                       )}
-                      
+
                       {product.description && (
                         <div>
                           <h4 className="text-sm font-medium text-gray-600 mb-2">Full Description</h4>

@@ -36,7 +36,7 @@ const VideoDisplayAutoPlay = () => {
   }, []);
 
   return (
-    <div className="max-full my-6">
+    <div className="max-full mt-18 md:my-6">
       <video
         ref={videoRef}
         src="/Dharma-Home-Page-Video.mp4"

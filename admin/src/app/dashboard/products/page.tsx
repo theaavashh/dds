@@ -14,9 +14,9 @@ import ProductPreviewModal from '@/components/ProductPreviewModal';
 import { ChevronLeft, ChevronRight, Edit, Eye, EyeOff, Trash2, ChevronDown, ChevronUp, Star, MessageSquare, Info, ExternalLink, X, Diamond, Search, Filter, ListFilter } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getCsrfToken } from '@/lib/csrfClient';
-import { Lato } from 'next/font/google';
 
-const lato = Lato({ subsets: ['latin'], display: 'swap', weight: ['400', '700'] });
+
+
 
 interface ProductImage {
   id: string;
@@ -92,6 +92,26 @@ interface Product {
   seoDescription?: string;
   seoKeywords?: string;
   seoSlug?: string;
+  metaDescription?: string;
+  canonicalUrl?: string;
+  robotsMeta?: string;
+  seoFriendlyImageFilename?: string;
+  imageAltText?: string;
+  imageTitle?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  lazyLoading?: boolean;
+  productSchema?: any;
+  offerSchema?: any;
+  brandSchema?: any;
+  breadcrumbSchema?: any;
+  itemListSchema?: any;
+  faqSchema?: any;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  twitterCard?: string;
+  optimizedImageFormat?: string;
   images?: ProductImage[];
   videoUrl?: string;
   stoneWeight?: string;
@@ -193,7 +213,7 @@ function ProductsContent() {
     sortOrder: 'desc',
   });
 
-  
+
 
   useEffect(() => {
     if (isSearchExpanded) {
@@ -1105,30 +1125,17 @@ function ProductsContent() {
                 <div className="flex bg-gray-100 rounded-xl p-1 shadow-sm">
                   <button
                     onClick={() => setViewMode('table')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                      viewMode === 'table'
-                        ? 'bg-white text-[#DFC97E] shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${viewMode === 'table'
+                      ? 'bg-white text-[#DFC97E] shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                      }`}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M3 14h18m-9-4v8m-7 4h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Table View
                   </button>
-                  <button
-                    onClick={() => setViewMode('cards')}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                      viewMode === 'cards'
-                        ? 'bg-white text-[#DFC97E] shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                    </svg>
-                    Card View
-                  </button>
+                 
                 </div>
                 <button
                   onClick={openModal}
@@ -1145,10 +1152,10 @@ function ProductsContent() {
             </div>
 
             {/* Modern Search and Filter Bar */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-              <div className="flex flex-col lg:flex-row gap-4">
+            <div className="bg-white p-4">
+              <div className="flex flex-col lg:flex-row gap-32">
                 {/* Search Input */}
-                <div className="flex-1 relative">
+                <div className="flex-1 relative w-8">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                   <input
                     value={searchTerm}
@@ -1159,7 +1166,7 @@ function ProductsContent() {
                     }}
                     type="text"
                     placeholder="Search products by name, code, or description..."
-                    className="w-full pl-12 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#DFC97E] focus:border-[#B8956A] text-gray-900 placeholder-gray-500 transition-all duration-200"
+                    className="w-full pl-12 pr-4 py-3  border-b border-black outline-none text-gray-900 placeholder-gray-500 transition-all duration-200"
                   />
                 </div>
 
@@ -1182,40 +1189,7 @@ function ProductsContent() {
                     ))}
                   </select>
 
-                  {/* Status Filter - Show appropriate indicator based on selected status */}
-                  {selectedStatus === 'all' && (
-                    <select
-                      value="all"
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setSelectedStatus(value);
-                        const status = value === 'all' ? undefined : value === 'active';
-                        setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: status }));
-                        setCurrentPage(1);
-                      }}
-                      className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[#DFC97E] focus:border-[#B8956A] text-gray-900 bg-white"
-                    >
-                      <option value="all">All Status</option>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="draft">Draft</option>
-                    </select>
-                  )}
-                  {selectedStatus === 'active' && (
-                    <div className="px-4 py-3 rounded-lg border border-gray-300 bg-[#9A8873] text-white">
-                      Active Products
-                    </div>
-                  )}
-                  {selectedStatus === 'draft' && (
-                    <div className="px-4 py-3 rounded-lg border border-gray-300 bg-[#9A8873] text-white">
-                      Draft Products
-                    </div>
-                  )}
-                  {selectedStatus === 'inactive' && (
-                    <div className="px-4 py-3 rounded-lg border border-gray-300 bg-[#9A8873] text-white">
-                      Inactive Products
-                    </div>
-                  )}
+                 
 
                   {/* Advanced Filter Button */}
                   <button
@@ -1230,15 +1204,15 @@ function ProductsContent() {
             </div>
           </div>
 
-          <div className="mb-6 px-2 py-2 flex items-center justify-between border-b border-gray-200">
-            <div className="flex items-center gap-4">
+          <div className="mb-6 px-2 py-2 flex items-center justify-between border-b border-gray-200 ">
+            <div className="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-xl ">
               <button
                 onClick={() => {
                   setSelectedStatus('all');
                   setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: undefined }));
                   setCurrentPage(1);
                 }}
-                className={`px-4 py-2 rounded-lg text-base font-medium ${selectedStatus === 'all' ? 'bg-[#9A8873] text-white' : 'text-black hover:text-[#9A8873] bg-gray-100'}`}
+                className={`px-4 py-2 rounded-lg text-base font-medium ${selectedStatus === 'all' ? 'bg-[#DFC97E] text-white' : 'text-black hover:text-[#9A8873]'}`}
               >
                 All Products
               </button>
@@ -1248,7 +1222,7 @@ function ProductsContent() {
                   setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: true }));
                   setCurrentPage(1);
                 }}
-                className={`px-4 py-2 rounded-lg text-base font-medium ${selectedStatus === 'active' ? 'bg-[#9A8873] text-white' : 'text-black hover:text-[#9A8873] bg-gray-100'}`}
+                className={`px-4 py-2 rounded-lg text-base font-medium ${selectedStatus === 'active' ? 'bg-[#DFC97E] text-white' : 'text-black hover:text-[#9A8873] '}`}
               >
                 Active Products
               </button>
@@ -1258,7 +1232,7 @@ function ProductsContent() {
                   setAdvancedFilters((prev: ProductFilterData) => ({ ...prev, isActive: false }));
                   setCurrentPage(1);
                 }}
-                className={`px-4 py-2 rounded-lg text-base font-medium ${selectedStatus === 'draft' ? 'bg-[#9A8873] text-white' : 'text-black hover:text-[#9A8873] bg-gray-100'}`}
+                className={`px-4 py-2 rounded-lg text-base font-medium ${selectedStatus === 'draft' ? 'bg-[#DFC97E] text-white' : 'text-black hover:text-[#9A8873]'}`}
               >
                 Draft Products
               </button>
@@ -1311,7 +1285,7 @@ function ProductsContent() {
                 <ListFilter />
                 Filter
               </button>
-              
+
             </div>
           </div>
 
@@ -1324,13 +1298,13 @@ function ProductsContent() {
               <p className="mt-2 text-black">Loading products...</p>
             </div>
           ) : displayedProducts.length === 0 ? (
-            <div className="p-8 text-center text-black">
+            <div className="p-8 text-center text-black title-regular">
               <div className=" p-8">
-                <div className="w-16 h-16  mx-auto flex items-center justify-center">
+                <div className="w-16 h-16 mx-auto flex items-center justify-center">
                   <Diamond />
                 </div>
                 <h3 className="text-2xl font-semibold text-black mb-2">No products found</h3>
-                <p className="text-black text-xl mb-4 bg-[#DFC9FE]">Create your first product to get started</p>
+                <p className="text-black text-xl mb-4 ">Create your first product to get started</p>
                 <button
                   onClick={openModal}
                   className="bg-[#9A8873] text-lg text-white px-6 py-2 rounded-lg hover:bg-[#242f40] transition-colors"
@@ -1390,6 +1364,9 @@ function ProductsContent() {
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Price</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Stock</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">SEO Title</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">SEO Keywords</th>
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Meta Desc</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
@@ -1457,13 +1434,12 @@ function ProductsContent() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-2">
-                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                product.stock > 10 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : product.stock > 5 
-                                    ? 'bg-yellow-100 text-yellow-800' 
-                                    : 'bg-red-100 text-red-800'
-                              }`}>
+                              <span className={`px-3 py-1 rounded-full text-sm font-medium ${product.stock > 10
+                                ? 'bg-green-100 text-green-800'
+                                : product.stock > 5
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                                }`}>
                                 {product.stock} in stock
                               </span>
                             </div>
@@ -1483,6 +1459,21 @@ function ProductsContent() {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 max-w-xs truncate" title={product.seoTitle || 'N/A'}>
+                              {product.seoTitle || 'N/A'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 max-w-xs truncate" title={product.seoKeywords || 'N/A'}>
+                              {product.seoKeywords || 'N/A'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 max-w-xs truncate" title={product.seoDescription || 'N/A'}>
+                              {product.seoDescription ? product.seoDescription.substring(0, 50) + '...' : 'N/A'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-1">
                               <button
                                 onClick={() => openEditModal(product)}
@@ -1500,11 +1491,10 @@ function ProductsContent() {
                               </button>
                               <button
                                 onClick={() => handleToggleStatus(product.id)}
-                                className={`p-2 rounded-lg transition-all duration-200 ${
-                                  product.status === 'active'
-                                    ? 'text-orange-600 hover:text-orange-800 hover:bg-orange-50'
-                                    : 'text-green-600 hover:text-green-800 hover:bg-green-50'
-                                }`}
+                                className={`p-2 rounded-lg transition-all duration-200 ${product.status === 'active'
+                                  ? 'text-orange-600 hover:text-orange-800 hover:bg-orange-50'
+                                  : 'text-green-600 hover:text-green-800 hover:bg-green-50'
+                                  }`}
                                 title={product.status === 'active' ? 'Deactivate Product' : 'Activate Product'}
                               >
                                 {product.status === 'active' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -1687,6 +1677,115 @@ function ProductsContent() {
                                     <div>
                                       <span className="font-medium text-gray-700">Description:</span>
                                       <p className="mt-1 text-gray-900 whitespace-pre-wrap">{product.description}</p>
+                                    </div>
+                                  </div>
+
+                                  {/* SEO Information */}
+                                  <div className="space-y-4">
+                                    <h5 className="text-md font-semibold text-gray-800 border-b border-gray-200 pb-2">SEO Information</h5>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      {product.seoTitle && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">SEO Title:</span>
+                                          <span className="ml-2 text-gray-900">{product.seoTitle}</span>
+                                        </div>
+                                      )}
+                                      {product.seoDescription && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">SEO Description:</span>
+                                          <span className="ml-2 text-gray-900">{product.seoDescription}</span>
+                                        </div>
+                                      )}
+                                      {product.seoKeywords && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">SEO Keywords:</span>
+                                          <span className="ml-2 text-gray-900">{product.seoKeywords}</span>
+                                        </div>
+                                      )}
+                                      {product.seoSlug && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">SEO Slug:</span>
+                                          <span className="ml-2 text-gray-900">{product.seoSlug}</span>
+                                        </div>
+                                      )}
+                                      {product.metaDescription && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">Meta Description:</span>
+                                          <span className="ml-2 text-gray-900">{product.metaDescription}</span>
+                                        </div>
+                                      )}
+                                      {product.canonicalUrl && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">Canonical URL:</span>
+                                          <span className="ml-2 text-gray-900">{product.canonicalUrl}</span>
+                                        </div>
+                                      )}
+                                      {product.robotsMeta && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">Robots Meta:</span>
+                                          <span className="ml-2 text-gray-900">{product.robotsMeta}</span>
+                                        </div>
+                                      )}
+                                      {product.seoFriendlyImageFilename && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">SEO Image Filename:</span>
+                                          <span className="ml-2 text-gray-900">{product.seoFriendlyImageFilename}</span>
+                                        </div>
+                                      )}
+                                      {product.imageAltText && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">Image Alt Text:</span>
+                                          <span className="ml-2 text-gray-900">{product.imageAltText}</span>
+                                        </div>
+                                      )}
+                                      {product.imageTitle && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">Image Title:</span>
+                                          <span className="ml-2 text-gray-900">{product.imageTitle}</span>
+                                        </div>
+                                      )}
+                                      {(product.imageWidth || product.imageHeight) && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">Image Dimensions:</span>
+                                          <span className="ml-2 text-gray-900">{product.imageWidth}x{product.imageHeight}</span>
+                                        </div>
+                                      )}
+                                      {product.lazyLoading !== undefined && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">Lazy Loading:</span>
+                                          <span className="ml-2 text-gray-900">{product.lazyLoading ? 'Enabled' : 'Disabled'}</span>
+                                        </div>
+                                      )}
+                                      {product.optimizedImageFormat && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">Optimized Format:</span>
+                                          <span className="ml-2 text-gray-900">{product.optimizedImageFormat}</span>
+                                        </div>
+                                      )}
+                                      {product.ogTitle && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">OG Title:</span>
+                                          <span className="ml-2 text-gray-900">{product.ogTitle}</span>
+                                        </div>
+                                      )}
+                                      {product.ogDescription && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">OG Description:</span>
+                                          <span className="ml-2 text-gray-900">{product.ogDescription}</span>
+                                        </div>
+                                      )}
+                                      {product.ogImage && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">OG Image:</span>
+                                          <span className="ml-2 text-gray-900">{product.ogImage}</span>
+                                        </div>
+                                      )}
+                                      {product.twitterCard && (
+                                        <div>
+                                          <span className="font-medium text-gray-700">Twitter Card:</span>
+                                          <span className="ml-2 text-gray-900">{product.twitterCard}</span>
+                                        </div>
+                                      )}
                                     </div>
                                   </div>
 
@@ -1953,25 +2052,23 @@ function ProductsContent() {
 
                     {/* Status Badge */}
                     <div className="absolute top-4 right-4">
-                      <span className={`px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg backdrop-blur-sm ${
-                        product.status === 'active'
-                          ? 'bg-green-500 text-white'
-                          : product.status === 'inactive'
-                            ? 'bg-red-500 text-white'
-                            : 'bg-yellow-500 text-white'
+                      <span className={`px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg backdrop-blur-sm ${product.status === 'active'
+                        ? 'bg-green-500 text-white'
+                        : product.status === 'inactive'
+                          ? 'bg-red-500 text-white'
+                          : 'bg-yellow-500 text-white'
                         }`}>
                         <span className="flex items-center gap-1">
-                          <span className={`w-2 h-2 rounded-full ${
-                            product.status === 'active' ? 'bg-white' : 
+                          <span className={`w-2 h-2 rounded-full ${product.status === 'active' ? 'bg-white' :
                             product.status === 'inactive' ? 'bg-white' : 'bg-white'
-                          }`}></span>
+                            }`}></span>
                           {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
                         </span>
                       </span>
                     </div>
                   </div>
 
-{/* Product Content */}
+                  {/* Product Content */}
                   <div className="p-6">
                     {/* Product Name and Code */}
                     <div className="flex justify-between items-start mb-3">
@@ -1992,17 +2089,15 @@ function ProductsContent() {
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center gap-3">
                         <div className="text-2xl font-bold text-[#DFC97E]">NPR {product.price.toLocaleString()}</div>
-                        <div className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${
-                          product.stock > 10 
-                            ? 'bg-green-100 text-green-800' 
-                            : product.stock > 5 
-                              ? 'bg-yellow-100 text-yellow-800' 
-                              : 'bg-red-100 text-red-800'
-                        }`}>
-                          <span className={`w-2 h-2 rounded-full ${
-                            product.stock > 10 ? 'bg-green-600' : 
+                        <div className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1 ${product.stock > 10
+                          ? 'bg-green-100 text-green-800'
+                          : product.stock > 5
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-red-100 text-red-800'
+                          }`}>
+                          <span className={`w-2 h-2 rounded-full ${product.stock > 10 ? 'bg-green-600' :
                             product.stock > 5 ? 'bg-yellow-600' : 'bg-red-600'
-                          }`}></span>
+                            }`}></span>
                           {product.stock} units
                         </div>
                       </div>
@@ -2081,11 +2176,10 @@ function ProductsContent() {
                       </div>
                       <button
                         onClick={() => handleToggleStatus(product.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg ${
-                          product.status === 'active'
-                            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700'
-                            : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
-                        }`}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg ${product.status === 'active'
+                          ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700'
+                          : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                          }`}
                       >
                         {product.status === 'active' ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         {product.status === 'active' ? 'Deactivate' : 'Activate'}
@@ -2099,7 +2193,7 @@ function ProductsContent() {
 
           {/* Modern Pagination Controls */}
           {allProducts.length > 0 && totalPages > 1 && (
-            <div className="flex items-center justify-between bg-gradient-to-r from-white to-gray-50 px-6 py-4 rounded-2xl shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 mt-10">
               <div className="text-sm text-gray-700">
                 <span className="font-medium">Showing {(currentPage - 1) * itemsPerPage + 1}-{Math.min((currentPage - 1) * itemsPerPage + displayedProducts.length, serverTotalCount)}</span>
                 <span className="text-gray-500"> of {serverTotalCount} products</span>
@@ -2125,11 +2219,10 @@ function ProductsContent() {
                         <button
                           key={page}
                           onClick={() => setCurrentPage(page)}
-                          className={`w-10 h-10 rounded-lg font-medium transition-all duration-200 ${
-                            currentPage === page
-                              ? 'bg-gradient-to-r from-[#DFC97E] to-[#C7A862] text-white shadow-md'
-                              : 'border border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-[#C7A862] hover:text-[#DFC97E]'
-                          }`}
+                          className={`w-10 h-10 rounded-lg font-medium transition-all duration-200 ${currentPage === page
+                            ? 'bg-gradient-to-r from-[#DFC97E] to-[#C7A862] text-white shadow-md'
+                            : 'border border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-[#C7A862] hover:text-[#DFC97E]'
+                            }`}
                         >
                           {page}
                         </button>
@@ -2163,8 +2256,63 @@ function ProductsContent() {
               setIsModalOpen(false);
               setEditingProduct(null);
             }}
-            editingProduct={editingProduct}
-            onSuccess={fetchProducts}
+            initialData={editingProduct}
+            onSubmit={async (data) => {
+              try {
+                const csrfToken = getCsrfToken();
+                const isEditing = editingProduct?.id;
+
+                if (isEditing) {
+                  const response = await fetch(getApiUrl(`/products/${editingProduct.id}`), {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      ...(csrfToken && { 'x-csrf-token': csrfToken })
+                    },
+                    body: JSON.stringify(data)
+                  });
+
+                  if (response.ok) {
+                    toast.success('Product updated successfully!');
+                    fetchProducts();
+                    setIsModalOpen(false);
+                    setEditingProduct(null);
+                  } else {
+                    toast.error('Failed to update product');
+                  }
+                } else {
+                  const response = await fetch(getApiUrl('/products'), {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      ...(csrfToken && { 'x-csrf-token': csrfToken })
+                    },
+                    body: JSON.stringify(data)
+                  });
+
+                  if (response.ok) {
+                    toast.success('Product created successfully!');
+                    fetchProducts();
+                    setIsModalOpen(false);
+                    setEditingProduct(null);
+                  } else {
+                    toast.error('Failed to create product');
+                  }
+                }
+              } catch (error) {
+                toast.error('An error occurred');
+              }
+            }}
+            categories={categories.map(cat => ({
+              id: cat.id,
+              name: cat.title,
+              children: subcategories
+                .filter(sub => sub.categoryId === cat.id)
+                .map(sub => ({ id: sub.id, name: sub.name, parentId: cat.id }))
+            }))}
+            brands={[]}
           />
 
           {/* Delete Confirmation Modal */}

@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 
 async function main() {
   const fullname = 'Sajib Shrestha';
-  const username = 'sajibstha';
-  const email = 'sajibstha@celebrationdiamon.com'.toLowerCase();
-  const password = 'sajib123';
+  const username = 'aavashh';
+  const email = 'aavash.ganeju@gmail.com'.toLowerCase();
+  const password = 'aavash123';
   const role = 'admin';
   const assignRole = true;
 

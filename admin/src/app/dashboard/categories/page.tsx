@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Plus, Edit, Trash2, ChevronDown, ImageIcon, LinkIcon, Calendar, Search, ToggleLeft, ToggleRight, Upload, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Category, Subcategory } from '@/types/category';
-import { categoryService } from '@/services/categoryService';
-import { Urbanist } from 'next/font/google';
-import { getImageUrl } from '@/lib/api';
 
-const urbanist = Urbanist({ subsets: ['latin'], weight: ['400', '600', '700'], display: 'swap' });
+import { getImageUrl } from '@/lib/api';
+import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/hooks/useCategories';
+import ImageCropModal from '@/components/ImageCropModal';
+import { categoryService } from '@/services/categoryService';
 
 // Add these interfaces for temporary subcategories
 interface TempSubcategory {
@@ -19,9 +19,14 @@ interface TempSubcategory {
 }
 
 const CategoriesPage = () => {
-  // State for categories and loading
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // TanStack Query for categories
+  const { data: categoriesResponse, isLoading, refetch } = useCategories();
+  const categories = categoriesResponse?.data || [];
+
+  const createCategoryMutation = useCreateCategory();
+  const updateCategoryMutation = useUpdateCategory();
+  const deleteCategoryMutation = useDeleteCategory();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubcategorySubmitting, setIsSubcategorySubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,6 +47,7 @@ const CategoriesPage = () => {
     link: '',
     isActive: true,
     sortOrder: 0,
+    breadcrumbSchema: '',
   });
 
   const [subcategoryForm, setSubcategoryForm] = useState({
@@ -76,29 +82,11 @@ const CategoriesPage = () => {
   // State for expanded categories (to show subcategories)
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
-  // Fetch categories with subcategories
-  const fetchCategoriesWithSubcategories = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await categoryService.getAllCategories();
-
-      if (response.success && response.data) {
-        setCategories(response.data);
-      } else {
-        toast.error(response.message || 'Failed to fetch categories');
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      toast.error('Failed to fetch categories');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Effect to fetch categories on mount
-  useEffect(() => {
-    fetchCategoriesWithSubcategories();
-  }, [fetchCategoriesWithSubcategories]);
+  // State for image cropping
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [imageToCrop, setImageToCrop] = useState<string | null>(null);
+  const [cropAspect, setCropAspect] = useState(1);
+  const [currentCropType, setCurrentCropType] = useState<'icon' | 'image' | 'desktopBreadcrumb' | 'mobileBreadcrumb' | null>(null);
 
   // Reset temporary subcategories
   const resetTempSubcategories = () => {
@@ -153,6 +141,7 @@ const CategoriesPage = () => {
       link: '',
       isActive: true,
       sortOrder: 0,
+      breadcrumbSchema: '',
     });
     resetTempSubcategories();
     setSelectedIcon(null);
@@ -174,6 +163,7 @@ const CategoriesPage = () => {
       link: category.link || '',
       isActive: category.isActive,
       sortOrder: category.sortOrder || 0,
+      breadcrumbSchema: category.breadcrumbSchema || '',
     });
     setSelectedIcon(null);
     setSelectedImage(null);
@@ -226,40 +216,83 @@ const CategoriesPage = () => {
     }));
   };
 
-  // Handle file selection for icons
-  const handleIconSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedIcon(file);
-      setIconPreview(URL.createObjectURL(file));
-    }
+  // Handle manual crop initiation
+  const initiateCrop = (type: 'icon' | 'image' | 'desktopBreadcrumb' | 'mobileBreadcrumb', url: string, aspect?: number) => {
+    setImageToCrop(url);
+    setCropAspect(aspect);
+    setCurrentCropType(type);
+    setIsCropModalOpen(true);
   };
 
-  // Handle file selection for images
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-      setSelectedImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  // Handle file selection for desktop breadcrumb
-  const handleDesktopBreadcrumbSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setSelectedDesktopBreadcrumb(file);
-      setDesktopBreadcrumbPreview(URL.createObjectURL(file));
-    }
-  };
-
-  // Handle file selection for mobile breadcrumb
   const handleMobileBreadcrumbSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedMobileBreadcrumb(file);
-      setMobileBreadcrumbPreview(URL.createObjectURL(file));
+      const reader = new FileReader();
+      reader.onload = () => {
+        setMobileBreadcrumbPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const handleIconSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedIcon(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setIconPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setSelectedImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDesktopBreadcrumbSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedDesktopBreadcrumb(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        setDesktopBreadcrumbPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCropComplete = (croppedBlob: Blob) => {
+    const file = new File([croppedBlob], `cropped_${currentCropType}.jpg`, { type: 'image/jpeg' });
+    const previewUrl = URL.createObjectURL(croppedBlob);
+
+    if (currentCropType === 'icon') {
+      setSelectedIcon(file);
+      setIconPreview(previewUrl);
+    } else if (currentCropType === 'image') {
+      setSelectedImage(file);
+      setSelectedImagePreview(previewUrl);
+    } else if (currentCropType === 'desktopBreadcrumb') {
+      setSelectedDesktopBreadcrumb(file);
+      setDesktopBreadcrumbPreview(previewUrl);
+    } else if (currentCropType === 'mobileBreadcrumb') {
+      setSelectedMobileBreadcrumb(file);
+      setMobileBreadcrumbPreview(previewUrl);
+    }
+
+    setIsCropModalOpen(false);
+    setImageToCrop(null);
+    setCurrentCropType(null);
   };
 
   // Handle create/edit category
@@ -274,6 +307,16 @@ const CategoriesPage = () => {
     if (categoryForm.link && categoryForm.link.trim() && !categoryForm.link.startsWith('/')) {
       toast.error('Link must start with a forward slash (e.g., /products, /about)');
       return;
+    }
+
+    // Validate breadcrumb schema if provided (should be valid JSON)
+    if (categoryForm.breadcrumbSchema && categoryForm.breadcrumbSchema.trim()) {
+      try {
+        JSON.parse(categoryForm.breadcrumbSchema.trim());
+      } catch (error) {
+        toast.error('Breadcrumb schema must be valid JSON format');
+        return;
+      }
     }
 
     // Validate temporary subcategories if creating a new category
@@ -304,6 +347,11 @@ const CategoriesPage = () => {
         }
         formData.append('isActive', categoryForm.isActive ? 'true' : 'false'); // Convert boolean to string
         formData.append('sortOrder', String(categoryForm.sortOrder ?? 0));
+        
+        // Add breadcrumb schema if provided
+        if (categoryForm.breadcrumbSchema && categoryForm.breadcrumbSchema.trim()) {
+          formData.append('breadcrumbSchema', categoryForm.breadcrumbSchema.trim());
+        }
 
         // Handle icon upload
         if (selectedIcon) {
@@ -331,12 +379,15 @@ const CategoriesPage = () => {
           formData.append('mobileBreadcrumbUrl', editingCategory.mobileBreadcrumbUrl);
         }
 
-        // Use the category service for updating
-        const response = await categoryService.updateCategory(editingCategory.id, formData);
+        // Use the TanStack Query mutation for updating
+        const response = await updateCategoryMutation.mutateAsync({
+          id: editingCategory.id,
+          data: formData
+        });
 
         if (response.success) {
           toast.success('Category updated successfully!');
-          fetchCategoriesWithSubcategories();
+          refetch();
           setIsModalOpen(false);
           setEditingCategory(null);
           resetTempSubcategories();
@@ -364,6 +415,11 @@ const CategoriesPage = () => {
         }
         formData.append('isActive', categoryForm.isActive ? 'true' : 'false'); // Convert boolean to string
         formData.append('sortOrder', String(categoryForm.sortOrder ?? 0));
+        
+        // Add breadcrumb schema if provided
+        if (categoryForm.breadcrumbSchema && categoryForm.breadcrumbSchema.trim()) {
+          formData.append('breadcrumbSchema', categoryForm.breadcrumbSchema.trim());
+        }
 
         // Add subcategories as JSON string (filter out empty ones)
         const validSubcategories = tempSubcategories.filter(sub => sub.name.trim() !== '');
@@ -389,12 +445,12 @@ const CategoriesPage = () => {
           formData.append('mobileBreadcrumb', selectedMobileBreadcrumb);
         }
 
-        // Use the category service for creating
-        const response = await categoryService.createCategory(formData);
+        // Use the TanStack Query mutation for creating
+        const response = await createCategoryMutation.mutateAsync(formData);
 
         if (response.success) {
           toast.success('Category and subcategories created successfully!');
-          fetchCategoriesWithSubcategories();
+          refetch();
           setIsModalOpen(false);
           setEditingCategory(null);
           resetTempSubcategories();
@@ -446,7 +502,7 @@ const CategoriesPage = () => {
 
       if (response.success) {
         toast.success(editingSubcategory ? 'Subcategory updated successfully!' : 'Subcategory created successfully!');
-        fetchCategoriesWithSubcategories();
+        refetch();
         setIsSubcategoryModalOpen(false);
         setEditingSubcategory(null);
       } else {
@@ -477,11 +533,11 @@ const CategoriesPage = () => {
     if (!categoryToDelete) return;
 
     try {
-      const response = await categoryService.deleteCategory(categoryToDelete.id);
+      const response = await deleteCategoryMutation.mutateAsync(categoryToDelete.id);
 
       if (response.success) {
         toast.success('Category deleted successfully!');
-        fetchCategoriesWithSubcategories();
+        refetch();
       } else {
         toast.error(response.message || 'Failed to delete category');
       }
@@ -503,7 +559,7 @@ const CategoriesPage = () => {
 
       if (response.success) {
         toast.success('Subcategory deleted successfully!');
-        fetchCategoriesWithSubcategories();
+        refetch();
       } else {
         toast.error(response.message || 'Failed to delete subcategory');
       }
@@ -523,7 +579,7 @@ const CategoriesPage = () => {
 
       if (response.success) {
         toast.success('Category status updated!');
-        fetchCategoriesWithSubcategories();
+        refetch();
       } else {
         toast.error(response.message || 'Failed to update category status');
       }
@@ -540,7 +596,7 @@ const CategoriesPage = () => {
 
       if (response.success) {
         toast.success('Subcategory status updated!');
-        fetchCategoriesWithSubcategories();
+        refetch();
       } else {
         toast.error(response.message || 'Failed to update subcategory status');
       }
@@ -614,8 +670,8 @@ const CategoriesPage = () => {
         ) : (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {categories
-              .filter(c => c.title.toLowerCase().includes(searchTerm.toLowerCase()))
-              .map((category) => {
+              .filter((c: Category) => c.title.toLowerCase().includes(searchTerm.toLowerCase()))
+              .map((category: Category) => {
                 const isExpanded = expandedCategory === category.id;
 
                 return (
@@ -749,7 +805,7 @@ const CategoriesPage = () => {
                             </div>
                           ) : (
                             <div className="flex flex-wrap gap-2 mb-4">
-                              {category.subcategories?.map((subcategory) => (
+                              {category.subcategories?.map((subcategory: Subcategory) => (
                                 <div key={subcategory.id} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
                                   <span className="text-black text-sm font-medium">{subcategory.name}</span>
                                   <div className="ml-2 flex items-center space-x-1">
@@ -787,9 +843,10 @@ const CategoriesPage = () => {
 
         {/* Category Modal */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg w-full max-w-2xl flex flex-col max-h-[90vh]">
+              {/* Header */}
+              <div className="flex justify-between items-center p-6 border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-black">
                   {editingCategory ? 'Edit Category' : 'Add New Category'}
                 </h2>
@@ -801,353 +858,302 @@ const CategoriesPage = () => {
                 </button>
               </div>
 
-              <div className="space-y-6">
-                {/* Category Details Section */}
-                <div className="border-b border-gray-200 pb-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Category Details</h3>
+              {/* Scrollable Middle Section */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="space-y-6">
+                  {/* Category Details Section */}
+                  <div className="border-b border-gray-200 pb-4">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">Category Details</h3>
 
-                  {/* Title */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-black mb-2">
-                      Category Name *
-                    </label>
-                    <input
-                      type="text"
-                      value={categoryForm.title}
-                      onChange={(e) => handleCategoryFormChange('title', e.target.value)}
-                      placeholder="Enter category name"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black placeholder-black"
-                    />
-                  </div>
-
-                  {/* Link */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-black mb-2">
-                      Internal Link *
-                    </label>
-                    <input
-                      type="text"
-                      value={categoryForm.link}
-                      onChange={(e) => handleCategoryFormChange('link', e.target.value)}
-                      placeholder="Enter the redirector url"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black placeholder-black"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Required. Enter a relative path (e.g., /products/rings) or full URL for internal navigation.</p>
-                  </div>
-
-                  {/* Icon Upload */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-black mb-2">
-                      Category Icon *
-                    </label>
-                    <div className="space-y-4">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                        <div className="flex flex-col items-center">
-                          <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600 mb-2">Click to upload category icon</p>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleIconSelect}
-                            className="hidden"
-                            id="icon-upload"
-                          />
-                          <label
-                            htmlFor="icon-upload"
-                            className="bg-[#9A8873] text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center"
-                          >
-                            <Upload className="w-4 h-4 mr-2" />
-                            Choose Icon
-                          </label>
-                        </div>
-                      </div>
-                      {iconPreview && (
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-600 mb-2">Icon Preview:</p>
-                          <img
-                            src={(iconPreview.startsWith('http') || iconPreview.startsWith('blob:') || iconPreview.startsWith('data:')) ? iconPreview : getImageUrl(iconPreview)}
-                            alt="Icon Preview"
-                            className="w-16 h-16 object-cover rounded-lg border border-gray-300"
-                            onError={(e) => {
-                              console.error('Icon preview failed to load:', iconPreview);
-                              e.currentTarget.src = 'https://via.placeholder.com/64x64?text=No+Icon';
-                            }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Image Upload */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-black mb-2">
-                      Category Image
-                    </label>
-                    <div className="space-y-4">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                        <div className="flex flex-col items-center">
-                          <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600 mb-2">Click to upload category image</p>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageSelect}
-                            className="hidden"
-                            id="category-image-upload"
-                          />
-                          <label
-                            htmlFor="category-image-upload"
-                            className="bg-[#9A8873] text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer flex items-center"
-                          >
-                            <ImageIcon className="w-4 h-4 mr-2" />
-                            Choose Image
-                          </label>
-                        </div>
-                      </div>
-                      {imagePreview && (
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
-                          <img
-                            src={(imagePreview.startsWith('http') || imagePreview.startsWith('blob:') || imagePreview.startsWith('data:')) ? imagePreview : getImageUrl(imagePreview)}
-                            alt="Image Preview"
-                            className="w-full h-auto object-cover rounded-lg border border-gray-300"
-                            onError={(e) => {
-                              console.error('Image preview failed to load:', imagePreview);
-                              e.currentTarget.src = 'https://via.placeholder.com/400x200?text=No+Image';
-                            }}
-                          />
-                        </div>
-                      )}
-                      {selectedImage && !imagePreview && (
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-600 mb-2">Selected Image: {selectedImage.name}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Desktop Breadcrumb Upload */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-black mb-2">
-                      Breadcrumb Image (Desktop)
-                    </label>
-                    <div className="space-y-4">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                        <div className="flex flex-col items-center">
-                          <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600 mb-2">Click to upload desktop breadcrumb</p>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleDesktopBreadcrumbSelect}
-                            className="hidden"
-                            id="desktop-breadcrumb-upload"
-                          />
-                          <label
-                            htmlFor="desktop-breadcrumb-upload"
-                            className="bg-[#9A8873] text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer flex items-center"
-                          >
-                            <Upload className="w-4 h-4 mr-2" />
-                            Choose Image
-                          </label>
-                        </div>
-                      </div>
-                      {desktopBreadcrumbPreview && (
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-600 mb-2">Preview:</p>
-                          <img
-                            src={(desktopBreadcrumbPreview.startsWith('http') || desktopBreadcrumbPreview.startsWith('blob:') || desktopBreadcrumbPreview.startsWith('data:')) ? desktopBreadcrumbPreview : getImageUrl(desktopBreadcrumbPreview)}
-                            alt="Desktop Breadcrumb Preview"
-                            className="w-full h-auto object-cover rounded-lg border border-gray-300"
-                            onError={(e) => {
-                              e.currentTarget.src = 'https://via.placeholder.com/400x100?text=No+Image';
-                            }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Mobile Breadcrumb Upload */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-black mb-2">
-                      Breadcrumb Image (Mobile)
-                    </label>
-                    <div className="space-y-4">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                        <div className="flex flex-col items-center">
-                          <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600 mb-2">Click to upload mobile breadcrumb</p>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleMobileBreadcrumbSelect}
-                            className="hidden"
-                            id="mobile-breadcrumb-upload"
-                          />
-                          <label
-                            htmlFor="mobile-breadcrumb-upload"
-                            className="bg-[#9A8873] text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer flex items-center"
-                          >
-                            <Upload className="w-4 h-4 mr-2" />
-                            Choose Image
-                          </label>
-                        </div>
-                      </div>
-                      {mobileBreadcrumbPreview && (
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-600 mb-2">Preview:</p>
-                          <img
-                            src={(mobileBreadcrumbPreview.startsWith('http') || mobileBreadcrumbPreview.startsWith('blob:') || mobileBreadcrumbPreview.startsWith('data:')) ? mobileBreadcrumbPreview : getImageUrl(mobileBreadcrumbPreview)}
-                            alt="Mobile Breadcrumb Preview"
-                            className="w-full h-auto object-cover rounded-lg border border-gray-300"
-                            onError={(e) => {
-                              e.currentTarget.src = 'https://via.placeholder.com/200x100?text=No+Image';
-                            }}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-
-
-
-                  {/* Subcategories Section - Moved above Status */}
-                  <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">Subcategories</h3>
-                        {!editingCategory && tempSubcategories.length > 0 && (
-                          <span className="text-xs text-gray-500 ml-2">
-                            ({tempSubcategories.filter(s => s.name.trim()).length} added)
-                          </span>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => {
-                          // Focus on the subcategory input field
-                          const inputElement = document.querySelector('input[placeholder="Enter subcategory name"]') as HTMLInputElement;
-                          if (inputElement) {
-                            inputElement.focus();
-                          }
-                        }}
-                        disabled={!categoryForm.title.trim()}
-                        className={`text-sm font-medium transition-colors flex items-center ${categoryForm.title.trim()
-                          ? 'text-purple-600 hover:text-purple-700'
-                          : 'text-gray-400 cursor-not-allowed'
-                          }`}
-                      >
-                        <Plus className="w-4 h-4 mr-1" />
-                        Add Subcategory
-                      </button>
+                    {/* Title */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-black mb-2">
+                        Category Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={categoryForm.title}
+                        onChange={(e) => handleCategoryFormChange('title', e.target.value)}
+                        placeholder="Enter category name"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black placeholder-black"
+                      />
                     </div>
 
-                    {/* Instructions for new categories */}
-                    {!editingCategory && (
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                        <p className="text-sm text-blue-800">
-                          <strong>Tip:</strong> You can add subcategories now and they will be saved when you create the category.
-                        </p>
-                      </div>
-                    )}
+                    {/* Link */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-black mb-2">
+                        Internal Link *
+                      </label>
+                      <input
+                        type="text"
+                        value={categoryForm.link}
+                        onChange={(e) => handleCategoryFormChange('link', e.target.value)}
+                        placeholder="Enter the redirector url"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black placeholder-black"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Required. Enter a relative path (e.g., /products/rings) or full URL for internal navigation.</p>
+                    </div>
 
-                    {/* Display existing subcategories if editing */}
-                    {editingCategory && editingCategory.subcategories && editingCategory.subcategories.length > 0 && (
-                      <div className="space-y-2 max-h-40 overflow-y-auto mb-4">
-                        {editingCategory.subcategories.map((subcategory) => (
-                          <div key={subcategory.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                            <span className="text-sm font-medium text-gray-900">{subcategory.name}</span>
-                            <div className="flex space-x-2">
+                    {/* Icon Upload */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-black mb-2">
+                        Category Icon *
+                      </label>
+                      <div className="space-y-4">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                          <div className="flex flex-col items-center">
+                            <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-600 mb-2">Click to upload category icon</p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleIconSelect}
+                              className="hidden"
+                              id="icon-upload"
+                            />
+                            <label
+                              htmlFor="icon-upload"
+                              className="bg-[#9A8873] text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer flex items-center"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              Choose Icon
+                            </label>
+                          </div>
+                        </div>
+                        {iconPreview && (
+                          <div className="mt-2">
+                            <p className="text-sm text-gray-600 mb-2">Icon Preview:</p>
+                            <div className="flex items-center space-x-4">
+                              <img
+                                src={(iconPreview.startsWith('http') || iconPreview.startsWith('blob:') || iconPreview.startsWith('data:')) ? iconPreview : getImageUrl(iconPreview)}
+                                alt="Icon Preview"
+                                className="w-16 h-16 object-cover rounded-lg border border-gray-300"
+                                onError={(e) => {
+                                  console.error('Icon preview failed to load:', iconPreview);
+                                  e.currentTarget.src = 'https://via.placeholder.com/64x64?text=No+Icon';
+                                }}
+                              />
                               <button
-                                onClick={() => openEditSubcategoryModal(subcategory)}
-                                className="text-blue-600 hover:text-blue-700 text-xs flex items-center"
+                                type="button"
+                                onClick={() => initiateCrop('icon', (iconPreview.startsWith('http') || iconPreview.startsWith('blob:') || iconPreview.startsWith('data:')) ? iconPreview : getImageUrl(iconPreview), 1)}
+                                className="text-blue-600 text-sm font-medium hover:underline flex items-center"
                               >
-                                <Edit className="w-3 h-3 mr-1" />
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => openDeleteSubcategoryModal(subcategory)}
-                                className="text-red-600 hover:text-red-700 text-xs flex items-center"
-                              >
-                                <Trash2 className="w-3 h-3 mr-1" />
-                                Delete
+                                <Plus className="w-3 h-3 mr-1" />
+                                Crop Icon
                               </button>
                             </div>
                           </div>
-                        ))}
+                        )}
                       </div>
-                    )}
+                    </div>
 
-                    {/* Display temporary subcategories when creating new category */}
-                    {!editingCategory && (
-                      <div className="mb-4">
-                        {/* Input field for adding new subcategories */}
-                        <div className="flex mb-3">
-                          <input
-                            type="text"
-                            value={newSubcategoryName}
-                            onChange={(e) => setNewSubcategoryName(e.target.value)}
-                            placeholder="Enter subcategory name"
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg text-black placeholder-gray-500"
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter' && newSubcategoryName.trim()) {
-                                handleAddTempSubcategoryByName(newSubcategoryName.trim());
-                                setNewSubcategoryName('');
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={() => {
-                              if (newSubcategoryName.trim()) {
-                                handleAddTempSubcategoryByName(newSubcategoryName.trim());
-                                setNewSubcategoryName('');
-                              }
-                            }}
-                            className="bg-[#9A8873] text-white px-4 py-2 rounded-r-lg hover:bg-[#242f40] transition-colors"
-                          >
-                            Add
-                          </button>
+                    {/* Image Upload */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-black mb-2">
+                        Category Image
+                      </label>
+                      <div className="space-y-4">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                          <div className="flex flex-col items-center">
+                            <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-600 mb-2">Click to upload category image</p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleImageSelect}
+                              className="hidden"
+                              id="category-image-upload"
+                            />
+                            <label
+                              htmlFor="category-image-upload"
+                              className="bg-[#9A8873] text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer flex items-center"
+                            >
+                              <ImageIcon className="w-4 h-4 mr-2" />
+                              Choose Image
+                            </label>
+                          </div>
                         </div>
-
-                        {/* Display added subcategories as chips */}
-                        <div className="flex flex-wrap gap-2">
-                          {tempSubcategories.map((subcategory, index) => (
-                            <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
-                              <span className="text-black text-sm font-medium">{subcategory.name}</span>
+                        {imagePreview && (
+                          <div className="mt-2">
+                            <div className="flex justify-between items-center mb-2">
+                              <p className="text-sm text-gray-600">Image Preview:</p>
                               <button
-                                onClick={() => handleRemoveTempSubcategory(index)}
-                                className="ml-2 text-gray-500 hover:text-gray-700"
+                                type="button"
+                                onClick={() => initiateCrop('image', (imagePreview.startsWith('http') || imagePreview.startsWith('blob:') || imagePreview.startsWith('data:')) ? imagePreview : getImageUrl(imagePreview))}
+                                className="text-blue-600 text-sm font-medium hover:underline flex items-center"
                               >
-                                <X className="w-4 h-4" />
+                                <Plus className="w-3 h-3 mr-1" />
+                                Crop Image
                               </button>
                             </div>
-                          ))}
+                            <img
+                              src={(imagePreview.startsWith('http') || imagePreview.startsWith('blob:') || imagePreview.startsWith('data:')) ? imagePreview : getImageUrl(imagePreview)}
+                              alt="Image Preview"
+                              className="w-full h-auto object-cover rounded-lg border border-gray-300"
+                              onError={(e) => {
+                                console.error('Image preview failed to load:', imagePreview);
+                                e.currentTarget.src = 'https://via.placeholder.com/400x200?text=No+Image';
+                              }}
+                            />
+                          </div>
+                        )}
+                        {selectedImage && !imagePreview && (
+                          <div className="mt-2">
+                            <p className="text-sm text-gray-600 mb-2">Selected Image: {selectedImage.name}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Desktop Breadcrumb Upload */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-black mb-2">
+                        Breadcrumb Image (Desktop)
+                      </label>
+                      <div className="space-y-4">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                          <div className="flex flex-col items-center">
+                            <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-600 mb-2">Click to upload desktop breadcrumb</p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleDesktopBreadcrumbSelect}
+                              className="hidden"
+                              id="desktop-breadcrumb-upload"
+                            />
+                            <label
+                              htmlFor="desktop-breadcrumb-upload"
+                              className="bg-[#9A8873] text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer flex items-center"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              Choose Image
+                            </label>
+                          </div>
                         </div>
+                        {desktopBreadcrumbPreview && (
+                          <div className="mt-2">
+                            <div className="flex justify-between items-center mb-2">
+                              <p className="text-sm text-gray-600">Preview:</p>
+                              <button
+                                type="button"
+                                onClick={() => initiateCrop('desktopBreadcrumb', (desktopBreadcrumbPreview.startsWith('http') || desktopBreadcrumbPreview.startsWith('blob:') || desktopBreadcrumbPreview.startsWith('data:')) ? desktopBreadcrumbPreview : getImageUrl(desktopBreadcrumbPreview))}
+                                className="text-blue-600 text-sm font-medium hover:underline flex items-center"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Crop Desktop Breadcrumb
+                              </button>
+                            </div>
+                            <img
+                              src={(desktopBreadcrumbPreview.startsWith('http') || desktopBreadcrumbPreview.startsWith('blob:') || desktopBreadcrumbPreview.startsWith('data:')) ? desktopBreadcrumbPreview : getImageUrl(desktopBreadcrumbPreview)}
+                              alt="Desktop Breadcrumb Preview"
+                              className="w-full h-auto object-cover rounded-lg border border-gray-300"
+                              onError={(e) => {
+                                e.currentTarget.src = 'https://via.placeholder.com/400x100?text=No+Image';
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
 
-                    {/* Message when no subcategories exist */}
-                    {editingCategory && (!editingCategory.subcategories || editingCategory.subcategories.length === 0) && (
-                      <div className="text-center py-4 bg-gray-50 rounded-lg">
-                        <p className="text-gray-500 text-sm">No subcategories added yet</p>
-                        <button
-                          onClick={() => openSubcategoryModal(editingCategory.id)}
-                          className="mt-2 text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center"
-                        >
-                          <Plus className="w-4 h-4 mr-1" />
-                          + Add First Subcategory
-                        </button>
+                    {/* Mobile Breadcrumb Upload */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-black mb-2">
+                        Breadcrumb Image (Mobile)
+                      </label>
+                      <div className="space-y-4">
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                          <div className="flex flex-col items-center">
+                            <ImageIcon className="w-8 h-8 text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-600 mb-2">Click to upload mobile breadcrumb</p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={handleMobileBreadcrumbSelect}
+                              className="hidden"
+                              id="mobile-breadcrumb-upload"
+                            />
+                            <label
+                              htmlFor="mobile-breadcrumb-upload"
+                              className="bg-[#9A8873] text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors cursor-pointer flex items-center"
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              Choose Image
+                            </label>
+                          </div>
+                        </div>
+                        {mobileBreadcrumbPreview && (
+                          <div className="mt-2">
+                            <div className="flex justify-between items-center mb-2">
+                              <p className="text-sm text-gray-600">Preview:</p>
+                              <button
+                                type="button"
+                                onClick={() => initiateCrop('mobileBreadcrumb', (mobileBreadcrumbPreview.startsWith('http') || mobileBreadcrumbPreview.startsWith('blob:') || mobileBreadcrumbPreview.startsWith('data:')) ? mobileBreadcrumbPreview : getImageUrl(mobileBreadcrumbPreview))}
+                                className="text-blue-600 text-sm font-medium hover:underline flex items-center"
+                              >
+                                <Plus className="w-3 h-3 mr-1" />
+                                Crop Mobile Breadcrumb
+                              </button>
+                            </div>
+                            <img
+                              src={(mobileBreadcrumbPreview.startsWith('http') || mobileBreadcrumbPreview.startsWith('blob:') || mobileBreadcrumbPreview.startsWith('data:')) ? mobileBreadcrumbPreview : getImageUrl(mobileBreadcrumbPreview)}
+                              alt="Mobile Breadcrumb Preview"
+                              className="w-full h-auto object-cover rounded-lg border border-gray-300"
+                              onError={(e) => {
+                                e.currentTarget.src = 'https://via.placeholder.com/200x100?text=No+Image';
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
 
-                    {/* Message when creating new category with no temp subcategories */}
-                    {!editingCategory && tempSubcategories.length === 0 && (
-                      <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                        <ImageIcon className="mx-auto h-8 w-8 text-gray-400" />
-                        <p className="mt-2 text-sm text-gray-600">
-                          No subcategories added yet
+                    {/* Breadcrumb Schema Field */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-black mb-2">
+                        Breadcrumb Schema (JSON)
+                      </label>
+                      <div className="space-y-2">
+                        <textarea
+                          value={categoryForm.breadcrumbSchema}
+                          onChange={(e) => handleCategoryFormChange('breadcrumbSchema', e.target.value)}
+                          placeholder={`Example: 
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://example.com"
+  }, {
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Category Name",
+    "item": "https://example.com/category"
+  }]
+}`}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black placeholder-black font-mono text-sm h-40"
+                          rows={8}
+                        />
+                        <p className="text-xs text-gray-500">
+                          Optional. Enter structured JSON-LD data for SEO breadcrumbs. This will be added to the page's head.
                         </p>
+                      </div>
+                    </div>
+
+                    {/* Subcategories Section */}
+                    <div>
+                      <div className="flex justify-between items-center mb-4">
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900">Subcategories</h3>
+                          {!editingCategory && tempSubcategories.length > 0 && (
+                            <span className="text-xs text-gray-500 ml-2">
+                              ({tempSubcategories.filter(s => s.name.trim()).length} added)
+                            </span>
+                          )}
+                        </div>
                         <button
                           onClick={() => {
                             // Focus on the subcategory input field
@@ -1156,45 +1162,172 @@ const CategoriesPage = () => {
                               inputElement.focus();
                             }
                           }}
-                          className="mt-2 text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center"
+                          disabled={!categoryForm.title.trim()}
+                          className={`text-sm font-medium transition-colors flex items-center ${categoryForm.title.trim()
+                            ? 'text-purple-600 hover:text-purple-700'
+                            : 'text-gray-400 cursor-not-allowed'
+                            }`}
                         >
                           <Plus className="w-4 h-4 mr-1" />
-                          + Add First Subcategory
+                          Add Subcategory
                         </button>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Active Status - Moved below Subcategories */}
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-2">
-                      Status
-                    </label>
-                    <select
-                      value={categoryForm.isActive ? 'active' : 'inactive'}
-                      onChange={(e) => handleCategoryFormChange('isActive', e.target.value === 'active')}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                    </select>
-                  </div>
+                      {/* Instructions for new categories */}
+                      {!editingCategory && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                          <p className="text-sm text-blue-800">
+                            <strong>Tip:</strong> You can add subcategories now and they will be saved when you create the category.
+                          </p>
+                        </div>
+                      )}
 
-                  <div>
-                    <label className="block text-sm font-medium text-black mb-2">
-                      Sort Order
-                    </label>
-                    <input
-                      type="number"
-                      value={categoryForm.sortOrder}
-                      onChange={(e) => handleCategoryFormChange('sortOrder', parseInt(e.target.value) || 0)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                      min="0"
-                    />
+                      {/* Display existing subcategories if editing */}
+                      {editingCategory && editingCategory.subcategories && editingCategory.subcategories.length > 0 && (
+                        <div className="space-y-2 max-h-40 overflow-y-auto mb-4">
+                          {editingCategory.subcategories.map((subcategory) => (
+                            <div key={subcategory.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                              <span className="text-sm font-medium text-gray-900">{subcategory.name}</span>
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => openEditSubcategoryModal(subcategory)}
+                                  className="text-blue-600 hover:text-blue-700 text-xs flex items-center"
+                                >
+                                  <Edit className="w-3 h-3 mr-1" />
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => openDeleteSubcategoryModal(subcategory)}
+                                  className="text-red-600 hover:text-red-700 text-xs flex items-center"
+                                >
+                                  <Trash2 className="w-3 h-3 mr-1" />
+                                  Delete
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Display temporary subcategories when creating new category */}
+                      {!editingCategory && (
+                        <div className="mb-4">
+                          {/* Input field for adding new subcategories */}
+                          <div className="flex mb-3">
+                            <input
+                              type="text"
+                              value={newSubcategoryName}
+                              onChange={(e) => setNewSubcategoryName(e.target.value)}
+                              placeholder="Enter subcategory name"
+                              className="flex-1 px-3 py-2 border border-gray-300 rounded-l-lg text-black placeholder-gray-500"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter' && newSubcategoryName.trim()) {
+                                  handleAddTempSubcategoryByName(newSubcategoryName.trim());
+                                  setNewSubcategoryName('');
+                                }
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                if (newSubcategoryName.trim()) {
+                                  handleAddTempSubcategoryByName(newSubcategoryName.trim());
+                                  setNewSubcategoryName('');
+                                }
+                              }}
+                              className="bg-[#9A8873] text-white px-4 py-2 rounded-r-lg hover:bg-[#242f40] transition-colors"
+                            >
+                              Add
+                            </button>
+                          </div>
+
+                          {/* Display added subcategories as chips */}
+                          <div className="flex flex-wrap gap-2">
+                            {tempSubcategories.map((subcategory, index) => (
+                              <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                                <span className="text-black text-sm font-medium">{subcategory.name}</span>
+                                <button
+                                  onClick={() => handleRemoveTempSubcategory(index)}
+                                  className="ml-2 text-gray-500 hover:text-gray-700"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Message when no subcategories exist */}
+                      {editingCategory && (!editingCategory.subcategories || editingCategory.subcategories.length === 0) && (
+                        <div className="text-center py-4 bg-gray-50 rounded-lg">
+                          <p className="text-gray-500 text-sm">No subcategories added yet</p>
+                          <button
+                            onClick={() => openSubcategoryModal(editingCategory.id)}
+                            className="mt-2 text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center"
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            + Add First Subcategory
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Message when creating new category with no temp subcategories */}
+                      {!editingCategory && tempSubcategories.length === 0 && (
+                        <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                          <ImageIcon className="mx-auto h-8 w-8 text-gray-400" />
+                          <p className="mt-2 text-sm text-gray-600">
+                            No subcategories added yet
+                          </p>
+                          <button
+                            onClick={() => {
+                              // Focus on the subcategory input field
+                              const inputElement = document.querySelector('input[placeholder="Enter subcategory name"]') as HTMLInputElement;
+                              if (inputElement) {
+                                inputElement.focus();
+                              }
+                            }}
+                            className="mt-2 text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center"
+                          >
+                            <Plus className="w-4 h-4 mr-1" />
+                            + Add First Subcategory
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Active Status */}
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-2">
+                        Status
+                      </label>
+                      <select
+                        value={categoryForm.isActive ? 'active' : 'inactive'}
+                        onChange={(e) => handleCategoryFormChange('isActive', e.target.value === 'active')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                      >
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-2">
+                        Sort Order
+                      </label>
+                      <input
+                        type="number"
+                        value={categoryForm.sortOrder}
+                        onChange={(e) => handleCategoryFormChange('sortOrder', parseInt(e.target.value) || 0)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                        min="0"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end space-x-3 mt-6">
+
+              {/* Footer */}
+              <div className="flex justify-end space-x-3 p-6 border-t border-gray-200">
                 <button
                   onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
@@ -1214,202 +1347,207 @@ const CategoriesPage = () => {
               </div>
             </div>
           </div>
-        )
-        }
+        )}
 
         {/* Subcategory Modal */}
-        {
-          isSubcategoryModalOpen && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-                <div className="p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">
-                      {editingSubcategory ? 'Edit Subcategory' : 'Add New Subcategory'}
-                    </h2>
-                    <button
-                      onClick={() => setIsSubcategoryModalOpen(false)}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <X className="w-6 h-6" />
-                    </button>
+        {isSubcategoryModalOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {editingSubcategory ? 'Edit Subcategory' : 'Add New Subcategory'}
+                  </h2>
+                  <button
+                    onClick={() => setIsSubcategoryModalOpen(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubcategorySubmit}>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-1">
+                        Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={subcategoryForm.name}
+                        onChange={(e) => handleSubcategoryFormChange('name', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black"
+                        placeholder="Subcategory name"
+                        required
+                      />
+                    </div>
+
+                    {!editingSubcategory && (
+                      <div>
+                        <label className="block text-sm font-medium text-black mb-1">
+                          Category *
+                        </label>
+                        <select
+                          value={subcategoryForm.categoryId}
+                          onChange={(e) => handleSubcategoryFormChange('categoryId', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black"
+                          required
+                        >
+                          <option value="">Select Category</option>
+                          {categories.map((category: Category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.title}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-black mb-1">
+                        Sort Order
+                      </label>
+                      <input
+                        type="number"
+                        value={subcategoryForm.sortOrder}
+                        onChange={(e) => handleSubcategoryFormChange('sortOrder', parseInt(e.target.value) || 0)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black"
+                        placeholder="0"
+                        min="0"
+                      />
+                    </div>
+
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={subcategoryForm.isActive}
+                        onChange={(e) => handleSubcategoryFormChange('isActive', e.target.checked)}
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                      />
+                      <label className="ml-2 block text-sm text-black">
+                        Active
+                      </label>
+                    </div>
                   </div>
 
-                  <form onSubmit={handleSubcategorySubmit}>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-black mb-1">
-                          Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={subcategoryForm.name}
-                          onChange={(e) => handleSubcategoryFormChange('name', e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black"
-                          placeholder="Subcategory name"
-                          required
-                        />
-                      </div>
-
-                      {!editingSubcategory && (
-                        <div>
-                          <label className="block text-sm font-medium text-black mb-1">
-                            Category *
-                          </label>
-                          <select
-                            value={subcategoryForm.categoryId}
-                            onChange={(e) => handleSubcategoryFormChange('categoryId', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black"
-                            required
-                          >
-                            <option value="">Select Category</option>
-                            {categories.map((category) => (
-                              <option key={category.id} value={category.id}>
-                                {category.title}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-
-                      <div>
-                        <label className="block text-sm font-medium text-black mb-1">
-                          Sort Order
-                        </label>
-                        <input
-                          type="number"
-                          value={subcategoryForm.sortOrder}
-                          onChange={(e) => handleSubcategoryFormChange('sortOrder', parseInt(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-black"
-                          placeholder="0"
-                          min="0"
-                        />
-                      </div>
-
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={subcategoryForm.isActive}
-                          onChange={(e) => handleSubcategoryFormChange('isActive', e.target.checked)}
-                          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                        />
-                        <label className="ml-2 block text-sm text-black">
-                          Active
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end space-x-3 mt-6">
-                      <button
-                        type="button"
-                        onClick={() => setIsSubcategoryModalOpen(false)}
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isSubcategorySubmitting}
-                        className={`px-4 py-2 rounded-lg transition-colors ${isSubcategorySubmitting ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'
-                          }`}
-                      >
-                        {isSubcategorySubmitting ? 'Saving...' : (editingSubcategory ? 'Update' : 'Create')}
-                      </button>
-                    </div>
-                  </form>
-                </div>
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setIsSubcategoryModalOpen(false)}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubcategorySubmitting}
+                      className={`px-4 py-2 rounded-lg transition-colors ${isSubcategorySubmitting ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-purple-600 text-white hover:bg-purple-700'
+                        }`}
+                    >
+                      {isSubcategorySubmitting ? 'Saving...' : (editingSubcategory ? 'Update' : 'Create')}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
-          )
-        }
+          </div>
+        )}
 
         {/* Delete Category Confirmation Modal */}
-        {
-          isDeleteModalOpen && categoryToDelete && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-black">Confirm Delete</h2>
-                  <button
-                    onClick={() => setIsDeleteModalOpen(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
+        {isDeleteModalOpen && categoryToDelete && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-black">Confirm Delete</h2>
+                <button
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
-                <div className="mb-6">
-                  <p className="text-black mb-4">
-                    Are you sure you want to delete the category "<strong>{categoryToDelete.title}</strong>"?
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    This action cannot be undone. All products and subcategories associated with this category may be affected.
-                  </p>
-                </div>
+              <div className="mb-6">
+                <p className="text-black mb-4">
+                  Are you sure you want to delete the category "<strong>{categoryToDelete.title}</strong>"?
+                </p>
+                <p className="text-sm text-gray-600">
+                  This action cannot be undone. All products and subcategories associated with this category may be affected.
+                </p>
+              </div>
 
-                <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={() => setIsDeleteModalOpen(false)}
-                    className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDeleteCategory}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteCategory}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete
+                </button>
               </div>
             </div>
-          )
-        }
+          </div>
+        )}
 
         {/* Delete Subcategory Confirmation Modal */}
-        {
-          isDeleteSubcategoryModalOpen && subcategoryToDelete && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-black">Confirm Delete</h2>
-                  <button
-                    onClick={() => setIsDeleteSubcategoryModalOpen(false)}
-                    className="text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
+        {isDeleteSubcategoryModalOpen && subcategoryToDelete && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-black">Confirm Delete</h2>
+                <button
+                  onClick={() => setIsDeleteSubcategoryModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
-                <div className="mb-6">
-                  <p className="text-black mb-4">
-                    Are you sure you want to delete the subcategory "<strong>{subcategoryToDelete.name}</strong>"?
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    This action cannot be undone.
-                  </p>
-                </div>
+              <div className="mb-6">
+                <p className="text-black mb-4">
+                  Are you sure you want to delete the subcategory "<strong>{subcategoryToDelete.name}</strong>"?
+                </p>
+                <p className="text-sm text-gray-600">
+                  This action cannot be undone.
+                </p>
+              </div>
 
-                <div className="flex justify-end space-x-3">
-                  <button
-                    onClick={() => setIsDeleteSubcategoryModalOpen(false)}
-                    className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleDeleteSubcategory}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                  >
-                    Delete
-                  </button>
-                </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setIsDeleteSubcategoryModalOpen(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteSubcategory}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete
+                </button>
               </div>
             </div>
-          )
-        }
-      </div >
-    </DashboardLayout >
+          </div>
+        )}
+      </div>
+      {isCropModalOpen && imageToCrop && (
+        <ImageCropModal
+          image={imageToCrop}
+          aspect={cropAspect}
+          onClose={() => {
+            setIsCropModalOpen(false);
+            setImageToCrop(null);
+          }}
+          onCropComplete={handleCropComplete}
+          title={`Crop ${currentCropType === 'icon' ? 'Icon' : currentCropType === 'image' ? 'Image' : 'Breadcrumb'}`}
+        />
+      )}
+    </DashboardLayout>
   );
 }
 

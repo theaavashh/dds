@@ -73,3 +73,6 @@ export const authMiddleware = async (req: AuthenticatedRequest, res: Response<Ap
     });
   }
 };
+
+// Export authenticateAdmin as an alias to authMiddleware for compatibility
+export const authenticateAdmin = authMiddleware;

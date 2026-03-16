@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Lato } from 'next/font/google';
 
-const lato = Lato({ subsets: ['latin'], display: 'swap', weight: ['400','700'] });
 import { X } from 'lucide-react';
 
 interface ProductImage {
@@ -112,9 +110,22 @@ interface ProductPreviewModalProps {
   subcategories: Subcategory[];
 }
 
-const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({ 
-  isOpen, 
-  onClose, 
+// Helper function to get the correct image URL
+const getImageUrl = (url: string): string => {
+  if (!url) return 'https://via.placeholder.com/400x400?text=No+Image';
+  
+  // If it's already a blob URL or full HTTP URL, return as-is
+  if (url.startsWith('blob:') || url.startsWith('http')) {
+    return url;
+  }
+  
+  // Otherwise, construct the server URL
+  return `http://localhost:5000${url}`;
+};
+
+const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({
+  isOpen,
+  onClose,
   product,
   categories,
   subcategories
@@ -158,8 +169,8 @@ const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[9999]" onClick={onClose}>
-      <div 
-        className={`bg-white rounded-xl max-w-5xl w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-200 ${lato.className}`}
+      <div
+        className="bg-white rounded-xl max-w-5xl w-full max-h-[95vh] overflow-y-auto shadow-2xl border border-gray-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-8">
@@ -172,7 +183,7 @@ const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({
               <X className="w-6 h-6" />
             </button>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Left side - Product Image */}
             <div
@@ -185,7 +196,7 @@ const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({
               {product.images && product.images.length > 0 ? (
                 <>
                   <img
-                    src={product.images[currentImageIndex].url.startsWith('http') ? product.images[currentImageIndex].url : `http://localhost:5000${product.images[currentImageIndex].url}`}
+                    src={getImageUrl(product.images[currentImageIndex].url)}
                     alt={`${product.name} - Image ${currentImageIndex + 1}`}
                     className="object-cover w-full h-full rounded-xl shadow-lg"
                     onError={(e) => {
@@ -263,7 +274,7 @@ const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({
                 </div>
               )}
             </div>
-            
+
             {/* Right side - Product Details */}
             <div className="space-y-8">
               {/* Description */}
@@ -349,183 +360,183 @@ const ProductPreviewModal: React.FC<ProductPreviewModalProps> = ({
               </div>
 
               {/* Gold Details */}
-              {(product.goldWeight || 
-                product.goldPurity || 
+              {(product.goldWeight ||
+                product.goldPurity ||
                 product.goldType ||
                 product.goldCraftsmanship ||
                 product.goldDesignDescription ||
                 product.goldFinishedType ||
                 product.goldStones ||
                 product.goldStoneQuality) && (
-                <div className="border border-gray-200 rounded-lg">
-                  <div className="px-6 py-4 space-y-3">
-                    <h3 className="text-xl font-semibold text-black mb-4">Gold Details</h3>
-                    {product.goldWeight && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Gold Weight:</span>
-                        <span className="font-medium text-black">{product.goldWeight}</span>
-                      </div>
-                    )}
-                    {product.goldPurity && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Gold Purity:</span>
-                        <span className="font-medium text-black">{product.goldPurity}</span>
-                      </div>
-                    )}
-                    {product.goldType && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Gold Type:</span>
-                        <span className="font-medium text-black">{product.goldType}</span>
-                      </div>
-                    )}
-                    {product.goldCraftsmanship && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Craftsmanship:</span>
-                        <span className="font-medium text-black">{product.goldCraftsmanship}</span>
-                      </div>
-                    )}
-                    {product.goldDesignDescription && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Design Description:</span>
-                        <span className="font-medium text-black">{product.goldDesignDescription}</span>
-                      </div>
-                    )}
-                    {product.goldFinishedType && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Finished Type:</span>
-                        <span className="font-medium text-black">{product.goldFinishedType}</span>
-                      </div>
-                    )}
-                    {product.goldStones && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Stones:</span>
-                        <span className="font-medium text-black">{product.goldStones}</span>
-                      </div>
-                    )}
-                    {product.goldStoneQuality && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Stone Quality:</span>
-                        <span className="font-medium text-black">{product.goldStoneQuality}</span>
-                      </div>
-                    )}
+                  <div className="border border-gray-200 rounded-lg">
+                    <div className="px-6 py-4 space-y-3">
+                      <h3 className="text-xl font-semibold text-black mb-4">Gold Details</h3>
+                      {product.goldWeight && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Gold Weight:</span>
+                          <span className="font-medium text-black">{product.goldWeight}</span>
+                        </div>
+                      )}
+                      {product.goldPurity && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Gold Purity:</span>
+                          <span className="font-medium text-black">{product.goldPurity}</span>
+                        </div>
+                      )}
+                      {product.goldType && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Gold Type:</span>
+                          <span className="font-medium text-black">{product.goldType}</span>
+                        </div>
+                      )}
+                      {product.goldCraftsmanship && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Craftsmanship:</span>
+                          <span className="font-medium text-black">{product.goldCraftsmanship}</span>
+                        </div>
+                      )}
+                      {product.goldDesignDescription && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Design Description:</span>
+                          <span className="font-medium text-black">{product.goldDesignDescription}</span>
+                        </div>
+                      )}
+                      {product.goldFinishedType && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Finished Type:</span>
+                          <span className="font-medium text-black">{product.goldFinishedType}</span>
+                        </div>
+                      )}
+                      {product.goldStones && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Stones:</span>
+                          <span className="font-medium text-black">{product.goldStones}</span>
+                        </div>
+                      )}
+                      {product.goldStoneQuality && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Stone Quality:</span>
+                          <span className="font-medium text-black">{product.goldStoneQuality}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Diamond Details */}
-              {(product.diamondType || 
-                product.diamondShapeCut || 
-                product.diamondColorGrade || 
+              {(product.diamondType ||
+                product.diamondShapeCut ||
+                product.diamondColorGrade ||
                 product.diamondClarityGrade ||
                 product.diamondCutGrade ||
                 product.diamondCaratWeight ||
                 product.diamondMetalDetails ||
                 product.diamondCertification ||
                 product.diamondOrigin) && (
-                <div className="border border-gray-200 rounded-lg">
-                  <div className="px-6 py-4 space-y-3">
-                    <h3 className="text-xl font-semibold text-black mb-4">Diamond Details</h3>
-                    {product.diamondType && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Diamond Type:</span>
-                        <span className="font-medium text-black">{product.diamondType}</span>
-                      </div>
-                    )}
-                    {product.diamondShapeCut && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Diamond Shape/Cut:</span>
-                        <span className="font-medium text-black">{product.diamondShapeCut}</span>
-                      </div>
-                    )}
-                    {product.diamondColorGrade && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Color Grade:</span>
-                        <span className="font-medium text-black">{product.diamondColorGrade}</span>
-                      </div>
-                    )}
-                    {product.diamondClarityGrade && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Clarity:</span>
-                        <span className="font-medium text-black">{product.diamondClarityGrade}</span>
-                      </div>
-                    )}
-                    {product.diamondCutGrade && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Cut Grade:</span>
-                        <span className="font-medium text-black">{product.diamondCutGrade}</span>
-                      </div>
-                    )}
-                    {product.diamondCaratWeight && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Carat Weight:</span>
-                        <span className="font-medium text-black">{product.diamondCaratWeight}</span>
-                      </div>
-                    )}
-                    {product.diamondMetalDetails && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Metal Details:</span>
-                        <span className="font-medium text-black">{product.diamondMetalDetails}</span>
-                      </div>
-                    )}
-                    {product.diamondCertification && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Certification:</span>
-                        <span className="font-medium text-black">{product.diamondCertification}</span>
-                      </div>
-                    )}
-                    {product.diamondOrigin && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Origin:</span>
-                        <span className="font-medium text-black">{product.diamondOrigin}</span>
-                      </div>
-                    )}
+                  <div className="border border-gray-200 rounded-lg">
+                    <div className="px-6 py-4 space-y-3">
+                      <h3 className="text-xl font-semibold text-black mb-4">Diamond Details</h3>
+                      {product.diamondType && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Diamond Type:</span>
+                          <span className="font-medium text-black">{product.diamondType}</span>
+                        </div>
+                      )}
+                      {product.diamondShapeCut && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Diamond Shape/Cut:</span>
+                          <span className="font-medium text-black">{product.diamondShapeCut}</span>
+                        </div>
+                      )}
+                      {product.diamondColorGrade && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Color Grade:</span>
+                          <span className="font-medium text-black">{product.diamondColorGrade}</span>
+                        </div>
+                      )}
+                      {product.diamondClarityGrade && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Clarity:</span>
+                          <span className="font-medium text-black">{product.diamondClarityGrade}</span>
+                        </div>
+                      )}
+                      {product.diamondCutGrade && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Cut Grade:</span>
+                          <span className="font-medium text-black">{product.diamondCutGrade}</span>
+                        </div>
+                      )}
+                      {product.diamondCaratWeight && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Carat Weight:</span>
+                          <span className="font-medium text-black">{product.diamondCaratWeight}</span>
+                        </div>
+                      )}
+                      {product.diamondMetalDetails && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Metal Details:</span>
+                          <span className="font-medium text-black">{product.diamondMetalDetails}</span>
+                        </div>
+                      )}
+                      {product.diamondCertification && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Certification:</span>
+                          <span className="font-medium text-black">{product.diamondCertification}</span>
+                        </div>
+                      )}
+                      {product.diamondOrigin && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Origin:</span>
+                          <span className="font-medium text-black">{product.diamondOrigin}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Platinum Details */}
-              {(product.platinumWeight || 
+              {(product.platinumWeight ||
                 product.platinumType) && (
-                <div className="border border-gray-200 rounded-lg">
-                  <div className="px-6 py-4 space-y-3">
-                    <h3 className="text-xl font-semibold text-black mb-4">Platinum Details</h3>
-                    {product.platinumWeight && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Platinum Weight:</span>
-                        <span className="font-medium text-black">{product.platinumWeight}</span>
-                      </div>
-                    )}
-                    {product.platinumType && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Platinum Type:</span>
-                        <span className="font-medium text-black">{product.platinumType}</span>
-                      </div>
-                    )}
+                  <div className="border border-gray-200 rounded-lg">
+                    <div className="px-6 py-4 space-y-3">
+                      <h3 className="text-xl font-semibold text-black mb-4">Platinum Details</h3>
+                      {product.platinumWeight && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Platinum Weight:</span>
+                          <span className="font-medium text-black">{product.platinumWeight}</span>
+                        </div>
+                      )}
+                      {product.platinumType && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Platinum Type:</span>
+                          <span className="font-medium text-black">{product.platinumType}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Silver Details */}
-              {(product.silverWeight || 
+              {(product.silverWeight ||
                 product.silverType) && (
-                <div className="border border-gray-200 rounded-lg">
-                  <div className="px-6 py-4 space-y-3">
-                    <h3 className="text-xl font-semibold text-black mb-4">Silver Details</h3>
-                    {product.silverWeight && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Silver Weight:</span>
-                        <span className="font-medium text-black">{product.silverWeight}</span>
-                      </div>
-                    )}
-                    {product.silverType && (
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-black">Silver Type:</span>
-                        <span className="font-medium text-black">{product.silverType}</span>
-                      </div>
-                    )}
+                  <div className="border border-gray-200 rounded-lg">
+                    <div className="px-6 py-4 space-y-3">
+                      <h3 className="text-xl font-semibold text-black mb-4">Silver Details</h3>
+                      {product.silverWeight && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Silver Weight:</span>
+                          <span className="font-medium text-black">{product.silverWeight}</span>
+                        </div>
+                      )}
+                      {product.silverType && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="text-black">Silver Type:</span>
+                          <span className="font-medium text-black">{product.silverType}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Distribution Channels */}
               <div>

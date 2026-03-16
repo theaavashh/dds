@@ -1,8 +1,12 @@
-'use client';
-
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ShopByCategory from '@/components/ShopByCategory';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Fine Jewelry Collection',
+    description: 'Discover our complete collection of handmade diamond jewelry, necklaces, earrings, and more.',
+};
 
 export default function JewelryPage() {
     return (

@@ -8,6 +8,42 @@ export const getApiBaseUrl = (): string => {
 };
 
 /**
+ * Create API request headers with authentication
+ */
+export const createApiHeaders = (additionalHeaders: Record<string, string> = {}): Record<string, string> => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...additionalHeaders,
+  };
+
+  // Add CSRF token if available
+  if (typeof window !== 'undefined') {
+    const csrfToken = localStorage.getItem('csrfToken');
+    if (csrfToken) {
+      headers['x-csrf-token'] = csrfToken;
+    }
+  }
+
+  return headers;
+};
+
+/**
+ * Make authenticated API request
+ */
+export const apiRequest = async (
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> => {
+  const headers = createApiHeaders(options.headers as Record<string, string>);
+
+  return fetch(url, {
+    ...options,
+    headers,
+    credentials: 'include', // Important for cookies
+  });
+};
+
+/**
  * Get the API URL (without /api suffix) from environment variables
  */
 export const getApiUrl = (): string => {
@@ -28,7 +64,7 @@ export const getApiUrl = (): string => {
  */
 export const getImageUrl = (imagePath: string | null | undefined): string => {
   if (!imagePath) return '';
-  
+
   // If already a full URL, return as is
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
     return imagePath;
@@ -42,7 +78,7 @@ export const getImageUrl = (imagePath: string | null | undefined): string => {
   if (!normalizedPath.startsWith('/')) {
     normalizedPath = `/${normalizedPath}`;
   }
-  
+
   // Otherwise, prepend API URL
   const apiUrl = getApiUrl();
   return `${apiUrl}${normalizedPath}`;

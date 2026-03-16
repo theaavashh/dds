@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 
+
 const categories = [
   {
     id: 1,
@@ -57,21 +58,21 @@ const categories = [
 
 export default function ShopByCategory() {
   return (
-    <section className="py-10 bg-white">
+    <section className="my-10 mt-16 py-4 ">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-black tan-agean mb-4 uppercase ">
+        <div className="text-center mb-10">
+          <h2 className={`tan-agean text-2xl md:text-4xl font-extrabold text-black mb-4 uppercase`}>
             SHOP BY CATEGORY
           </h2>
-          <p className="text-lg md:text-lg text-black uppercase font-normal ">
-            CHOOSE FROM OUR VAST JEWELLERY COLLECTION
+          <p className="text-lg md:text-xl text-black font-semibold">
+            Choose From Our Vast Jewelry Collection
           </p>
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-16">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1 mb-16">
           {categories.map((category, index) => (
             <Link
               key={category.id}
@@ -83,9 +84,9 @@ export default function ShopByCategory() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="flex flex-col items-center cursor-pointer"
+                className="flex flex-col items-center cursor-pointer mb-6"
               >
-                <div className="relative w-full aspect-square bg-gray-50 mb-6 overflow-hidden">
+                <div className="relative w-full aspect-square bg-gray-50  overflow-hidden">
                   <Image
                     src={category.image}
                     alt={category.name}
@@ -93,9 +94,9 @@ export default function ShopByCategory() {
                     className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                   {/* Optional overlay effect */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
+
                 </div>
-                <h3 className="text-md font-normal text-black cabinet uppercase">
+                <h3 className="text-lg font-normal text-black cabinet uppercase">
                   {category.name}
                 </h3>
               </motion.div>

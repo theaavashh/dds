@@ -1,0 +1,40 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/theaavashh/workplace/celebration-diamonds/api/logs/.fe5f0df2b9a9cccf309741f80dbd7fb10464febe-audit.json",
+    "files": [
+        {
+            "date": 1770177077789,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/combined-2026-02-04.log",
+            "hash": "fc2fdb553e0df45b7babfac23aa88a4a32d9851279232cc62d5b0fe87e3a2099"
+        },
+        {
+            "date": 1770263276484,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/combined-2026-02-05.log",
+            "hash": "56b126bcdaf34368fd2a07d0cff7cb27e2469c0181eaff015926fa8ee182e78c"
+        },
+        {
+            "date": 1770345637825,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/combined-2026-02-06.log",
+            "hash": "331aa378b2e277e00e354a013f0142ac2005092ad5f50ef5dcd1494facdd2d36"
+        },
+        {
+            "date": 1770531442156,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/combined-2026-02-08.log",
+            "hash": "bb8ba78a95e6082ab17e4e2d849b060e2a87a42b7e1e1dc6b5eb7ce6a098d889"
+        },
+        {
+            "date": 1770832223112,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/combined-2026-02-11.log",
+            "hash": "5af69556d228a9d6a62d7e0ebacc9c0dcc223d7287925893e4f56f86edb0340f"
+        },
+        {
+            "date": 1770834459941,
+            "name": "/home/theaavashh/workplace/celebration-diamonds/api/logs/combined-2026-02-12.log",
+            "hash": "4e6800b963f379b06d7b06fb411f492ec57608927611b6a2a54524941b82b687"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 
+
 const advantages = [
   {
     id: 1,
@@ -28,15 +29,15 @@ const advantages = [
 
 export default function DharmaAdvantages() {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-2xl  font-bold text-black mb-4 uppercase tan-agean">
-            Celebration Diamonds Advantage
+          <h2 className={`text-lg  font-bold mb-4 uppercase tan-agean`}>
+            Celebration Diamonds <span className="text-2xl font-bold text-[#DFC97E]">Advantage</span>
           </h2>
-          <p className="text-lg md:text-xl  text-gray-500 uppercase font-normal">
+          <p className={`text-xl md:text-xl text-gray-500 font-semibold`}>
             Reason to shop with us!
           </p>
         </div>
@@ -62,7 +63,7 @@ export default function DharmaAdvantages() {
                   />
                 </div>
               </div>
-              <h3 className="text-lg  font-medium text-black">
+              <h3 className="text-lg font-medium text-black">
                 {item.title}
               </h3>
             </motion.div>

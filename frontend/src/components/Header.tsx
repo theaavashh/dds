@@ -87,7 +87,8 @@ const menuItems = [
       { label: 'MENS BRACELATE', href: '/jewelry/mens-bracelate' },
     ]
   },
- 
+  { label: 'CONTACT US', href: '/contact' },
+  { label: 'REGISTER AS RESELLER', href: '/register-reseller' },
 ];
 
 // Header props interface
@@ -108,8 +109,6 @@ export default function Header({
   const [scrolled, setScrolled] = useState(false)
   const [showSearch, setShowSearch] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState([])
-  const [isSearching, setIsSearching] = useState(false)
   const [showUserDropdown, setShowUserDropdown] = useState(false)
   const [cartCount, setCartCount] = useState(0)
 
@@ -155,25 +154,13 @@ export default function Header({
   }, [])
 
   // Handle search submission
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      setIsSearching(true);
-      try {
-        // Fetch search results from API
-        const response = await fetch(`/api/search?q=${encodeURIComponent(searchQuery.trim())}`);
-        if (response.ok) {
-          const data = await response.json();
-          setSearchResults(data.results || []);
-        } else {
-          setSearchResults([]);
-        }
-      } catch (error) {
-        console.error('Search error:', error);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
+      // Redirect to search page with query parameter
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSearch(false);
+      setSearchQuery('');
     }
   }
 
@@ -186,7 +173,6 @@ export default function Header({
     setShowSearch(!showSearch)
     if (!showSearch) {
       setSearchQuery('')
-      setSearchResults([])
     }
   }
 
@@ -295,7 +281,7 @@ export default function Header({
         />
 
         <div className="px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex justify-between items-center py-3">
+          <div className="flex justify-between items-center py-2 md:py-3">
             {/* Logo Section */}
             <div className="flex flex-col items-center">
               <Link href="/" className="flex flex-col items-center">
@@ -304,6 +290,7 @@ export default function Header({
                   alt={logoAlt}
                   width={logoWidth}
                   height={logoHeight}
+                  className="w-12 h-12 md:w-[70px] md:h-[70px]"
                 />
               </Link>
             </div>
@@ -328,7 +315,7 @@ export default function Header({
                         <X className="w-6 h-6 text-gray-600" />
                       </button>
                     </div>
-                    
+
                     <form onSubmit={handleSearch} className="relative mb-8">
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -346,63 +333,7 @@ export default function Header({
                       </div>
                     </form>
 
-                    {/* Search Results Container */}
-                    {searchQuery && (
-                      <motion.div 
-                        className="max-h-96 overflow-y-auto"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        {isSearching ? (
-                          <div className="flex justify-center items-center h-32">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-                          </div>
-                        ) : searchResults.length > 0 ? (
-                          <div className="space-y-4">
-                            <p className="text-sm text-gray-600 mb-4">
-                              Found {searchResults.length} {searchResults.length === 1 ? 'result' : 'results'} for "{searchQuery}"
-                            </p>
-                            {searchResults.map((result: any, index: number) => (
-                              <div 
-                                key={index} 
-                                className="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-all duration-200 group"
-                                onClick={() => {
-                                  router.push(`/product/${result.id}`);
-                                  setShowSearch(false);
-                                }}
-                              >
-                                <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden mr-4">
-                                  {result.image && (
-                                    <Image 
-                                      src={result.image} 
-                                      alt={result.name} 
-                                      width={64} 
-                                      height={64}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                    />
-                                  )}
-                                </div>
-                                <div className="flex-1">
-                                  <h3 className="font-medium text-gray-900 text-lg mb-1">{result.name}</h3>
-                                  <p className="text-amber-600 font-semibold">${result.price?.toFixed(2)}</p>
-                                </div>
-                                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-amber-600 transition-colors" />
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-center py-12">
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <Search className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <p className="text-gray-500 text-lg mb-2">No results found</p>
-                            <p className="text-gray-400">Try searching with different keywords</p>
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
+
 
                     {/* Quick Search Suggestions */}
                     {!searchQuery && (
@@ -431,8 +362,8 @@ export default function Header({
               {/* Cart Icon - Always visible */}
               <div className="relative">
                 {renderIconWithTooltip(
-                  <ShoppingCart className="h-5 w-5" />, 
-                  'Cart', 
+                  <ShoppingCart className="h-5 w-5" />,
+                  'Cart',
                   () => router.push('/cart')
                 )}
                 {cartCount > 0 && (
@@ -543,7 +474,7 @@ export default function Header({
               initial="closed"
               animate="open"
               exit="closed"
-              className="fixed top-0 right-0 w-full md:w-[450px] h-full bg-white/95 backdrop-blur-xl z-[70] shadow-2xl flex flex-col"
+              className="fixed top-0 right-0 w-[90vw] md:w-[450px] h-full bg-white/95 backdrop-blur-xl z-[70] shadow-2xl flex flex-col"
             >
               <div className="flex justify-end p-6">
                 <button
@@ -562,7 +493,7 @@ export default function Header({
                       className="border-b border-gray-200/50"
                     >
                       <div
-                        className="flex items-center justify-between px-8 py-5 group hover:bg-gray-50 transition-colors cursor-pointer"
+                        className="flex items-center justify-between px-8 py-2 group hover:bg-gray-50 transition-colors cursor-pointer"
                         onClick={() => {
                           if (item.hasSubmenu) {
                             setExpandedItem(expandedItem === item.label ? null : item.label);
@@ -572,12 +503,12 @@ export default function Header({
                           }
                         }}
                       >
-                        <span className="text-sm font-bold tracking-[0.1em] text-gray-900 uppercase">
+                        <span className="text-lg font-medium  text-gray-900 uppercase">
                           {item.label}
                         </span>
                         {item.hasSubmenu && (
                           <ChevronRight
-                            className={`w-5 h-5 text-gray-400 group-hover:text-amber-600 transition-transform duration-300 ${expandedItem === item.label ? 'rotate-90' : ''}`}
+                            className={`w-5 h-5 text-black group-hover:text-amber-600 transition-transform duration-300 ${expandedItem === item.label ? 'rotate-90' : ''}`}
                           />
                         )}
                       </div>
@@ -597,7 +528,7 @@ export default function Header({
                                 key={subItem.label}
                                 href={subItem.href}
                                 onClick={() => setIsSidebarOpen(false)}
-                                className="block pl-12 pr-8 py-3 text-xs font-medium text-gray-600 hover:text-amber-600 tracking-wider uppercase"
+                                className="block pl-12 pr-8 py-1 text-md font-medium text-gray-600 hover:text-amber-600 tracking-wider uppercase"
                               >
                                 {subItem.label}
                               </Link>

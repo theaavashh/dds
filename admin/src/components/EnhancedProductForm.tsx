@@ -12,9 +12,9 @@ interface Category {
   id: string;
   name: string;
   parentId?: string;
-  children?: Array<{ 
-    id: string; 
-    name: string; 
+  children?: Array<{
+    id: string;
+    name: string;
     parentId?: string;
     _count?: { products: number };
   }>;
@@ -69,70 +69,109 @@ const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({
     resolver: zodResolver(productSchema),
     defaultValues: {
       name: '',
-      slug: '',
-      description: undefined,
-      shortDescription: undefined,
+      productCode: '',
+      description: '',
+      fullDescription: '',
+      category: '',
+      subCategory: '',
+      status: 'draft',
       price: 0,
-      comparePrice: undefined,
-      costPrice: undefined,
-      discountPrice: undefined,
-      discountPercentage: undefined,
-      margin: undefined,
-      minOrderQuantity: undefined,
-      maxOrderQuantity: undefined,
-      sku: undefined,
-      categoryId: '',
-      subCategoryId: undefined,
-      brandId: undefined,
-      tags: [],
-      images: [],
-      isActive: true,
+      comparePrice: 0,
+      costPrice: 0,
+      discountPrice: 0,
+      discountPercentage: 0,
       stock: 0,
-      weight: undefined,
-      dimensions: undefined,
-      seo: {
-        title: undefined,
-        description: undefined,
-        keywords: [],
-        ogTitle: undefined,
-        ogDescription: undefined,
-        ogImage: undefined,
-        canonicalUrl: undefined,
-        focusKeyword: undefined,
+      isActive: true,
+      digitalBrowser: false,
+      distributor: false,
+      website: false,
+      normalUser: false,
+      resellerUser: false,
+      culture: '',
+      goldWeight: '',
+      goldPurity: '',
+      goldType: '',
+      goldCraftsmanship: '',
+      goldDesignDescription: '',
+      goldFinishedType: '',
+      goldStones: '',
+      goldStoneQuality: '',
+      diamondType: '',
+      diamondShapeCut: '',
+      diamondColorGrade: '',
+      diamondClarityGrade: '',
+      diamondCutGrade: '',
+      diamondMetalDetails: '',
+      diamondCertification: '',
+      diamondOrigin: '',
+      diamondCaratWeight: '',
+      diamondDetails: '',
+      diamondQuantity: 0,
+      diamondSize: '',
+      diamondWeight: '',
+      diamondQuality: '',
+      platinumType: '',
+      platinumWeight: '',
+      silverType: '',
+      silverWeight: '',
+      jewelryType: '',
+      materialType: '',
+      metalType: '',
+      finish: '',
+      orderDuration: '',
+      imageUrl: '', // Main Image
+      images: [], // Gallery Images
+      videoUrl: '',
+      sku: '',
+      weight: 0,
+      dimensions: {
+        length: 0,
+        width: 0,
+        height: 0,
       },
+      minOrderQuantity: 1,
+      maxOrderQuantity: 999,
+      seoTitle: '',
+      seoDescription: '',
+      seoKeywords: '',
+      seoSlug: '',
+      metaDescription: '',
+      canonicalUrl: '',
+      robotsMeta: 'index, follow',
+      seoFriendlyImageFilename: '',
+      imageAltText: '',
+      imageTitle: '',
+      imageWidth: 0,
+      imageHeight: 0,
+      lazyLoading: true,
+      ogTitle: '',
+      ogDescription: '',
+      ogImage: '',
+      twitterCard: '',
+      optimizedImageFormat: 'webp',
+      productSchema: null,
+      offerSchema: null,
+      brandSchema: null,
+      breadcrumbSchema: null,
+      itemListSchema: null,
+      faqSchema: null,
+      tags: [],
       isFeatured: false,
       isDigital: false,
       requiresShipping: true,
       trackQuantity: true,
       allowBackorder: false,
-      minQuantity: undefined,
-      maxQuantity: undefined,
-      isTodaysBestDeal: false,
-      isOnSale: false,
-      isFestivalOffer: false,
-      isNewLaunch: false,
-      isBestSeller: false,
       variants: [],
-      // Shipping fields
-      shippingCountry: undefined,
-      deliveryCharge: 0,
-      minDeliveryDays: 3,
-      maxDeliveryDays: 7,
-      freeShippingThreshold: 0,
-      shippingWeight: 0,
-      isFragile: false,
-      isHazardous: false,
     }
   });
 
   const tabs = [
     { id: 'basic', label: 'Basic Info', icon: FileText },
+    { id: 'jewelry', label: 'Jewelry Details', icon: Sparkles },
     { id: 'pricing', label: 'Pricing', icon: DollarSign },
     { id: 'inventory', label: 'Inventory', icon: Package },
     { id: 'media', label: 'Media', icon: Camera },
-    { id: 'seo', label: 'SEO', icon: Search },
-    { id: 'shipping', label: 'Shipping', icon: Truck },
-    { id: 'advanced', label: 'Advanced', icon: Settings },
+    { id: 'seo', label: 'SEO & Social', icon: Search },
   ];
 
   const handleNextTab = () => {
@@ -149,15 +188,15 @@ const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({
     }
   };
 
-  // Watch categoryId to clear subCategoryId when category changes
-  const watchedCategoryId = watch('categoryId');
-  
+  // Watch category for auto-filling
+  const watchedCategory = watch('category');
+
   useEffect(() => {
-    if (watchedCategoryId) {
+    if (watchedCategory) {
       // Clear sub-category when main category changes
-      setValue('subCategoryId', '');
+      setValue('subCategory', '');
     }
-  }, [watchedCategoryId, setValue]);
+  }, [watchedCategory, setValue]);
 
   const { fields: tagFields, append: appendTag, remove: removeTag } = useFieldArray({
     control,
@@ -182,10 +221,19 @@ const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
-        reset(initialData);
-        // For editing, set preview images from existing data
-        const imageUrls = initialData.images || (initialData.imageUrl ? [initialData.imageUrl] : []);
-        setPreviewImages(imageUrls);
+        // Map initialData from Prisma to Form structure
+        const formattedData = {
+          ...initialData,
+          // Handle images relation - map to URLs for preview if they are objects
+          images: initialData.images?.map((img: any) => typeof img === 'string' ? img : img.url) || [],
+          // Ensure dimensions object exists
+          dimensions: initialData.dimensions || { length: 0, width: 0, height: 0 },
+        };
+        reset(formattedData);
+        // Set preview images
+        const galleryUrls = formattedData.images || [];
+        const mainUrl = initialData.imageUrl ? [initialData.imageUrl] : [];
+        setPreviewImages([...mainUrl, ...galleryUrls]);
       } else {
         reset();
         setPreviewImages([]);
@@ -208,100 +256,36 @@ const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({
   }, [watchedName, setValue, initialData]);
 
   // Custom submit handler that only validates essential fields
-  const handleCustomSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    console.log('Form submission attempted');
-    
-    // Convert string values to numbers for validation and remove unsupported fields
-    const formData = getValues();
-    console.log('Raw form data:', formData);
-    
-    // Create minimal data with only essential fields
-    const processedData: any = {
-      name: formData.name,
-      slug: formData.slug || '',
-      price: formData.price ? Number(formData.price) : 0,
-      categoryId: formData.categoryId,
-      tags: formData.tags || [],
-      images: formData.images || [],
-      isActive: formData.isActive !== undefined ? formData.isActive : true,
-      stock: formData.stock ? Number(formData.stock) : 0,
-      isFeatured: formData.isFeatured !== undefined ? formData.isFeatured : false,
-      isDigital: formData.isDigital !== undefined ? formData.isDigital : false,
-      requiresShipping: formData.requiresShipping !== undefined ? formData.requiresShipping : true,
-      trackQuantity: formData.trackQuantity !== undefined ? formData.trackQuantity : true,
-      allowBackorder: formData.allowBackorder !== undefined ? formData.allowBackorder : false,
-      minQuantity: formData.minQuantity ? Number(formData.minQuantity) : undefined,
-      maxQuantity: formData.maxQuantity ? Number(formData.maxQuantity) : undefined,
-      // Add only fields that have actual values (not empty strings or undefined)
-      ...(formData.description && formData.description.trim() && { description: formData.description }),
-      ...(formData.shortDescription && formData.shortDescription.trim() && { shortDescription: formData.shortDescription }),
-      ...(formData.sku && formData.sku.trim() && { sku: formData.sku }),
-      ...(formData.subCategoryId && formData.subCategoryId.trim() && { subCategoryId: formData.subCategoryId }),
-      ...(formData.brandId && formData.brandId.trim() && { brandId: formData.brandId }),
-      // Add pricing fields
-      ...(formData.comparePrice && formData.comparePrice > 0 && { comparePrice: Number(formData.comparePrice) }),
-      ...(formData.costPrice && formData.costPrice > 0 && { costPrice: Number(formData.costPrice) }),
-      ...(formData.margin && formData.margin > 0 && { margin: Number(formData.margin) }),
-      // SEO fields
-      ...(formData.seo && { seo: formData.seo }),
-      // Weight and dimensions
-      ...(formData.weight && { weight: Number(formData.weight) }),
-      ...(formData.dimensions && { dimensions: formData.dimensions }),
-      // Shipping fields
-      ...(formData.shippingCountry && { shippingCountry: formData.shippingCountry }),
-      ...(formData.deliveryCharge !== undefined && { deliveryCharge: Number(formData.deliveryCharge) }),
-      ...(formData.minDeliveryDays && { minDeliveryDays: Number(formData.minDeliveryDays) }),
-      ...(formData.maxDeliveryDays && { maxDeliveryDays: Number(formData.maxDeliveryDays) }),
-      ...(formData.freeShippingThreshold !== undefined && { freeShippingThreshold: Number(formData.freeShippingThreshold) }),
-      ...(formData.shippingWeight && { shippingWeight: Number(formData.shippingWeight) }),
-      ...(formData.isFragile !== undefined && { isFragile: formData.isFragile }),
-      ...(formData.isHazardous !== undefined && { isHazardous: formData.isHazardous }),
-    };
-    
-    console.log('Processed data being sent to API:', processedData);
-    
-    // Only validate essential fields
-    const essentialFields = ['name', 'price', 'categoryId'];
-    const isValid = await trigger(essentialFields);
-    
-    console.log('Validation result:', isValid);
-    console.log('Form errors:', errors);
-    console.log('Processed form data:', processedData);
-    
-    if (isValid) {
-      console.log('Submitting processed form data:', processedData);
-      // Pass the form data to the onSubmit function
-      await onSubmit(processedData);
-    } else {
-      console.log('Validation failed, switching to Basic Info tab');
-      // Switch to Basic Info tab if validation fails
-      setActiveTab('basic');
+  const onFormSubmit = async (data: any) => {
+    try {
+      console.log('Submitting form data:', data);
+      await onSubmit(data);
+    } catch (error) {
+      console.error('Submission error:', error);
     }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
-  
+
     const newImages: string[] = [];
     let processedCount = 0;
-  
+
     files.forEach((file, index) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result as string;
         newImages[index] = result;
         processedCount++;
-      
+
         // When all files are processed
         if (processedCount === files.length) {
           // Get current images from form state
           const currentImages = getValues('images') || [];
           // Combine existing images with new ones
           const updatedImages = [...currentImages, ...newImages.filter(img => img !== undefined)];
-        
+
           // Update both form state and preview
           setValue('images', updatedImages);
           setPreviewImages(updatedImages);
@@ -309,18 +293,18 @@ const EnhancedProductForm: React.FC<EnhancedProductFormProps> = ({
       };
       reader.readAsDataURL(file);
     });
-};
+  };
 
-const removeImage = (index: number) => {
-  // Get current images
-  const currentImages = getValues('images') || [];
-  // Remove the image at the specified index
-  const newImages = currentImages.filter((_: any, i: number) => i !== index);
-  
-  // Update both form state and preview
-  setValue('images', newImages);
-  setPreviewImages(newImages);
-};
+  const removeImage = (index: number) => {
+    // Get current images
+    const currentImages = getValues('images') || [];
+    // Remove the image at the specified index
+    const newImages = currentImages.filter((_: any, i: number) => i !== index);
+
+    // Update both form state and preview
+    setValue('images', newImages);
+    setPreviewImages(newImages);
+  };
 
   const addTag = () => {
     appendTag('');
@@ -330,8 +314,8 @@ const removeImage = (index: number) => {
     appendKeyword('');
   };
 
-  const mainCategories = useMemo(() => 
-    categories.filter((cat: any) => !cat.parentId), 
+  const mainCategories = useMemo(() =>
+    categories.filter((cat: any) => !cat.parentId),
     [categories]
   );
 
@@ -373,11 +357,10 @@ const removeImage = (index: number) => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600 bg-blue-50'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
+                    className={`flex items-center px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600 bg-blue-50'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
                   >
                     <Icon className="w-4 h-4 mr-2" />
                     {tab.label}
@@ -388,7 +371,7 @@ const removeImage = (index: number) => {
           </div>
 
           {/* Form Content */}
-          <form onSubmit={handleCustomSubmit} className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col h-[calc(100vh-180px)] md:h-[calc(100vh-200px)]">
             <div className="p-6 max-h-[60vh] overflow-y-auto">
               <AnimatePresence mode="wait">
                 <motion.div
@@ -425,66 +408,24 @@ const removeImage = (index: number) => {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
-                            SKU *
+                            Product Code *
                           </label>
                           <Controller
-                            name="sku"
+                            name="productCode"
                             control={control}
                             render={({ field }) => (
                               <input
                                 {...field}
                                 type="text"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                placeholder="Enter SKU"
+                                placeholder="Enter Product Code"
                               />
                             )}
                           />
-                          {errors.sku && (
-                            <p className="text-red-500 text-sm mt-1">{String(errors.sku.message)}</p>
+                          {errors.productCode && (
+                            <p className="text-red-500 text-sm mt-1">{String(errors.productCode.message)}</p>
                           )}
                         </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Short Description *
-                        </label>
-                        <Controller
-                          name="shortDescription"
-                          control={control}
-                          render={({ field }) => (
-                            <textarea
-                              {...field}
-                              rows={3}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                              placeholder="Brief product description"
-                            />
-                          )}
-                        />
-                        {errors.shortDescription && (
-                          <p className="text-red-500 text-sm mt-1">{String(errors.shortDescription.message)}</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Full Description *
-                        </label>
-                        <Controller
-                          name="description"
-                          control={control}
-                          render={({ field }) => (
-                            <textarea
-                              {...field}
-                              rows={6}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                              placeholder="Detailed product description"
-                            />
-                          )}
-                        />
-                        {errors.description && (
-                          <p className="text-red-500 text-sm mt-1">{String(errors.description.message)}</p>
-                        )}
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -493,7 +434,7 @@ const removeImage = (index: number) => {
                             Category *
                           </label>
                           <Controller
-                            name="categoryId"
+                            name="category"
                             control={control}
                             render={({ field }) => (
                               <select
@@ -501,23 +442,16 @@ const removeImage = (index: number) => {
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                               >
                                 <option value="">Select Category</option>
-                                {mainCategories.map(category => (
-                                  <optgroup key={category.id} label={category.name}>
-                                    <option value={category.id}>
-                                      {category.name} {category._count && `(${category._count.products} products)`}
-                                    </option>
-                                    {category.children?.map((subcategory) => (
-                                      <option key={subcategory.id} value={subcategory.id}>
-                                        └─ {subcategory.name} {subcategory._count && `(${subcategory._count.products} products)`}
-                                      </option>
-                                    ))}
-                                  </optgroup>
+                                {categories.map(cat => (
+                                  <option key={cat.id} value={cat.name}>
+                                    {cat.name}
+                                  </option>
                                 ))}
                               </select>
                             )}
                           />
-                          {errors.categoryId && (
-                            <p className="text-red-500 text-sm mt-1">{String(errors.categoryId.message)}</p>
+                          {errors.category && (
+                            <p className="text-red-500 text-sm mt-1">{String(errors.category.message)}</p>
                           )}
                         </div>
 
@@ -526,104 +460,471 @@ const removeImage = (index: number) => {
                             Sub-Category
                           </label>
                           <Controller
-                            name="subCategoryId"
+                            name="subCategory"
                             control={control}
                             render={({ field }) => {
-                              const selectedCategoryId = watch('categoryId');
-                              const subCategories = selectedCategoryId 
-                                ? categories.find(cat => cat.id === selectedCategoryId)?.children || []
-                                : [];
-                              
+                              const selectedCategoryName = watch('category');
+                              const selectedCategory = categories.find(cat => cat.name === selectedCategoryName);
+                              const subCategories = selectedCategory?.children || [];
+
                               return (
                                 <select
                                   {...field}
-                                  disabled={!selectedCategoryId}
+                                  disabled={!selectedCategoryName}
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black disabled:bg-gray-100 disabled:cursor-not-allowed"
                                 >
                                   <option value="">
-                                    {selectedCategoryId ? 'Select Sub-Category' : 'Select a category first'}
+                                    {selectedCategoryName ? 'Select Sub-Category' : 'Select a category first'}
                                   </option>
-                                  {subCategories.map((subCategory) => (
-                                    <option key={subCategory.id} value={subCategory.id}>
-                                      {subCategory.name} {subCategory._count && `(${subCategory._count.products} products)`}
+                                  {subCategories.map((sub) => (
+                                    <option key={sub.id} value={sub.name}>
+                                      {sub.name}
                                     </option>
                                   ))}
                                 </select>
                               );
                             }}
                           />
-                          {errors.subCategoryId && (
-                            <p className="text-red-500 text-sm mt-1">{String(errors.subCategoryId.message)}</p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Brand
-                          </label>
-                          <Controller
-                            name="brandId"
-                            control={control}
-                            render={({ field }) => (
-                              <select
-                                {...field}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                              >
-                                <option value="">Select Brand</option>
-                                {brands
-                                  .sort((a, b) => a.name.localeCompare(b.name))
-                                  .map((brand) => (
-                                    <option key={brand.id} value={brand.id}>
-                                      {brand.name} {brand.website && `(${brand.website})`}
-                                    </option>
-                                  ))}
-                              </select>
-                            )}
-                          />
-                          {errors.brandId && (
-                            <p className="text-red-500 text-sm mt-1">{String(errors.brandId.message)}</p>
-                          )}
                         </div>
                       </div>
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Tags
+                          Description *
                         </label>
-                        <div className="space-y-2">
-                          {tagFields.map((field, index) => (
-                            <div key={field.id} className="flex gap-2">
-                              <Controller
-                                name={`tags.${index}`}
-                                control={control}
-                                render={({ field }) => (
+                        <Controller
+                          name="description"
+                          control={control}
+                          render={({ field }) => (
+                            <textarea
+                              {...field}
+                              rows={4}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                              placeholder="General product description"
+                            />
+                          )}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Full Description
+                        </label>
+                        <Controller
+                          name="fullDescription"
+                          control={control}
+                          render={({ field }) => (
+                            <textarea
+                              {...field}
+                              rows={6}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                              placeholder="In-depth product description"
+                            />
+                          )}
+                        />
+                      </div>
+
+                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center">
+                          <Globe className="w-4 h-4 mr-2 text-blue-600" />
+                          Visibility & Channels
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {[
+                            { name: 'isActive', label: 'Active Product' },
+                            { name: 'website', label: 'Website' },
+                            { name: 'distributor', label: 'Distributor' },
+                            { name: 'digitalBrowser', label: 'Digital Browser' },
+                            { name: 'normalUser', label: 'Normal User' },
+                            { name: 'resellerUser', label: 'Reseller User' },
+                          ].map(flag => (
+                            <Controller
+                              key={flag.name}
+                              name={flag.name as any}
+                              control={control}
+                              render={({ field }) => (
+                                <label className="flex items-center space-x-3 p-2 bg-white rounded-lg border border-gray-100 hover:border-blue-200 cursor-pointer transition-colors">
                                   <input
-                                    {...field}
-                                    type="text"
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                    placeholder="Enter tag"
+                                    type="checkbox"
+                                    checked={field.value}
+                                    onChange={field.onChange}
+                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                   />
+                                  <span className="text-sm text-gray-700">{flag.label}</span>
+                                </label>
+                              )}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Culture/Tradition
+                        </label>
+                        <Controller
+                          name="culture"
+                          control={control}
+                          render={({ field }) => (
+                            <input
+                              {...field}
+                              type="text"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                              placeholder="Nepali, Indian, Western, etc."
+                            />
+                          )}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Jewelry Details Tab */}
+                  {activeTab === 'jewelry' && (
+                    <div className="space-y-8">
+                      {/* Gold Details */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium text-gray-900 flex items-center border-b pb-2">
+                          <Sparkles className="w-5 h-5 mr-2 text-yellow-600" />
+                          Gold Details
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {[
+                            { 
+                              name: 'goldWeight', 
+                              label: 'Gold Weight',
+                              isNumber: true
+                            },
+                            { 
+                              name: 'goldPurity', 
+                              label: 'Gold Purity',
+                              options: ['24K', '22K', '18K', '14K', '10K']
+                            },
+                            { 
+                              name: 'goldType', 
+                              label: 'Gold Type',
+                              options: ['Yellow Gold', 'White Gold', 'Rose Gold', 'Green Gold', 'Blue Gold', 'Other']
+                            },
+                            { 
+                              name: 'goldCraftsmanship', 
+                              label: 'Craftsmanship',
+                              options: ['Handmade', 'Machine Made', 'Hand-Finished', 'Traditional', 'Modern', 'Custom']
+                            },
+                            { 
+                              name: 'goldFinishedType', 
+                              label: 'Finished Type',
+                              options: ['Polished', 'Matte', 'Brushed', 'Hammered', 'Satin', 'Antique', 'Textured', 'Other']
+                            },
+                            { 
+                              name: 'goldStones', 
+                              label: 'Gold Stones',
+                              options: ['Diamond', 'Ruby', 'Emerald', 'Sapphire', 'Pearl', 'No Stones', 'Mixed Stones', 'Other']
+                            },
+                            { 
+                              name: 'goldStoneQuality', 
+                              label: 'Stone Quality',
+                              options: ['Premium', 'Excellent', 'Very Good', 'Good', 'Fair', 'Natural', 'Lab-Created', 'Other']
+                            },
+                          ].map(field => (
+                            <div key={field.name}>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">{field.label}</label>
+                              <Controller
+                                name={field.name as any}
+                                control={control}
+                                render={({ field: inputField }) => (
+                                  field.isNumber ? (
+                                    <input
+                                      {...inputField}
+                                      type="number"
+                                      step="0.01"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                      placeholder={`Enter ${field.label.toLowerCase()}`}
+                                    />
+                                  ) : field.options ? (
+                                    <select
+                                      {...inputField}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                    >
+                                      <option value="">Select {field.label}</option>
+                                      {field.options.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                      ))}
+                                    </select>
+                                  ) : (
+                                    <input
+                                      {...inputField}
+                                      type="text"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                      placeholder={field.label}
+                                    />
+                                  )
                                 )}
                               />
-                              <button
-                                type="button"
-                                onClick={() => removeTag(index)}
-                                className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
                             </div>
                           ))}
-                          <button
-                            type="button"
-                            onClick={addTag}
-                            className="flex items-center px-3 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-                          >
-                            <Plus className="w-4 h-4 mr-1" />
-                            Add Tag
-                          </button>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Design Description</label>
+                          <Controller
+                            name="goldDesignDescription"
+                            control={control}
+                            render={({ field }) => (
+                              <textarea
+                                {...field}
+                                rows={2}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                placeholder="Describe the gold design..."
+                              />
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Diamond Details */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium text-gray-900 flex items-center border-b pb-2">
+                          <Sparkles className="w-5 h-5 mr-2 text-blue-400" />
+                          Diamond Details
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {[
+                            { 
+                              name: 'diamondType', 
+                              label: 'Diamond Type',
+                              options: ['Natural', 'Lab-Grown', 'Simulant', 'Moissanite', 'Cubic Zirconia', 'Other']
+                            },
+                            { 
+                              name: 'diamondShapeCut', 
+                              label: 'Shape/Cut',
+                              options: ['Round', 'Princess', 'Cushion', 'Emerald', 'Oval', 'Pear', 'Marquise', 'Heart', 'Asscher', 'Radiant', 'Other']
+                            },
+                            { 
+                              name: 'diamondColorGrade', 
+                              label: 'Color Grade',
+                              options: ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'Fancy', 'Other']
+                            },
+                            { 
+                              name: 'diamondClarityGrade', 
+                              label: 'Clarity Grade',
+                              options: ['FL', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2', 'I1', 'I2', 'I3', 'Other']
+                            },
+                            { 
+                              name: 'diamondCutGrade', 
+                              label: 'Cut Grade',
+                              options: ['Excellent', 'Very Good', 'Good', 'Fair', 'Poor', 'Ideal', 'Super Ideal', 'Other']
+                            },
+                            { 
+                              name: 'diamondCertification', 
+                              label: 'Certification',
+                              options: ['GIA', 'IGI', 'AGS', 'HRD', 'EGL', 'GCAL', 'Not Certified', 'Other']
+                            },
+                            { 
+                              name: 'diamondOrigin', 
+                              label: 'Origin',
+                              options: ['Botswana', 'Russia', 'Canada', 'Australia', 'South Africa', 'India', 'Brazil', 'Unknown', 'Other']
+                            },
+                            { 
+                              name: 'diamondCaratWeight', 
+                              label: 'Carat Weight',
+                              isNumber: true
+                            },
+                            { 
+                              name: 'diamondSize', 
+                              label: 'Diamond Size',
+                              options: ['Tiny', 'Small', 'Medium', 'Large', 'Extra Large', 'Custom']
+                            },
+                            { 
+                              name: 'diamondWeight', 
+                              label: 'Diamond Weight',
+                              isNumber: true
+                            },
+                            { 
+                              name: 'diamondQuality', 
+                              label: 'Diamond Quality',
+                              options: ['Premium', 'Excellent', 'Very Good', 'Good', 'Commercial', 'Industrial', 'Other']
+                            },
+                          ].map(field => (
+                            <div key={field.name}>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">{field.label}</label>
+                              <Controller
+                                name={field.name as any}
+                                control={control}
+                                render={({ field: inputField }) => (
+                                  field.isNumber ? (
+                                    <input
+                                      {...inputField}
+                                      type="number"
+                                      step="0.01"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                      placeholder={`Enter ${field.label.toLowerCase()}`}
+                                    />
+                                  ) : field.options ? (
+                                    <select
+                                      {...inputField}
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                    >
+                                      <option value="">Select {field.label}</option>
+                                      {field.options.map(option => (
+                                        <option key={option} value={option}>{option}</option>
+                                      ))}
+                                    </select>
+                                  ) : (
+                                    <input
+                                      {...inputField}
+                                      type="text"
+                                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                      placeholder={field.label}
+                                    />
+                                  )
+                                )}
+                              />
+                            </div>
+                          ))}
+                          <div>
+                            <label className="block text-xs font-medium text-gray-500 mb-1">Diamond Quantity</label>
+                            <Controller
+                              name="diamondQuantity"
+                              control={control}
+                              render={({ field }) => (
+                                <input
+                                  {...field}
+                                  type="number"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                  placeholder="Quantity"
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Additional Diamond Details</label>
+                          <Controller
+                            name="diamondDetails"
+                            control={control}
+                            render={({ field }) => (
+                              <textarea
+                                {...field}
+                                rows={2}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                placeholder="Any other diamond specifics..."
+                              />
+                            )}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Platinum & Silver Details */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-medium text-gray-900 flex items-center border-b pb-2">
+                            <Sparkles className="w-5 h-5 mr-2 text-gray-400" />
+                            Platinum Details
+                          </h3>
+                          <div className="grid grid-cols-1 gap-4">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">Platinum Type</label>
+                              <Controller
+                                name="platinumType"
+                                control={control}
+                                render={({ field }) => (
+                                  <input {...field} type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm" />
+                                )}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">Platinum Weight</label>
+                              <Controller
+                                name="platinumWeight"
+                                control={control}
+                                render={({ field }) => (
+                                  <input {...field} type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm" />
+                                )}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-4">
+                          <h3 className="text-lg font-medium text-gray-900 flex items-center border-b pb-2">
+                            <Sparkles className="w-5 h-5 mr-2 text-gray-300" />
+                            Silver Details
+                          </h3>
+                          <div className="grid grid-cols-1 gap-4">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">Silver Type</label>
+                              <Controller
+                                name="silverType"
+                                control={control}
+                                render={({ field }) => (
+                                  <input {...field} type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm" />
+                                )}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">Silver Weight</label>
+                              <Controller
+                                name="silverWeight"
+                                control={control}
+                                render={({ field }) => (
+                                  <input {...field} type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm" />
+                                )}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* General Jewelry Specs */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium text-gray-900 flex items-center border-b pb-2">
+                          <Settings className="w-5 h-5 mr-2 text-gray-600" />
+                          General Specifications
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {[
+                            { 
+                              name: 'jewelryType', 
+                              label: 'Jewelry Type',
+                              options: ['Ring', 'Necklace', 'Earrings', 'Bracelet', 'Pendant', 'Bangles', 'Mangalsutra', 'Chain', 'Anklet', 'Brooch', 'Other']
+                            },
+                            { 
+                              name: 'materialType', 
+                              label: 'Material Type',
+                              options: ['Gold', 'Silver', 'Platinum', 'Diamond', 'Gemstone', 'Mixed Metal', 'Other']
+                            },
+                            { 
+                              name: 'metalType', 
+                              label: 'Metal Type',
+                              options: ['Yellow Gold', 'White Gold', 'Rose Gold', 'Platinum', 'Silver', 'Sterling Silver', 'Other']
+                            },
+                            { 
+                              name: 'finish', 
+                              label: 'Finish',
+                              options: ['Polished', 'Matte', 'Brushed', 'Hammered', 'Satin', 'Antique', 'High Polish', 'Other']
+                            },
+                            { 
+                              name: 'orderDuration', 
+                              label: 'Order Duration',
+                              options: ['1-2 Days', '3-5 Days', '1 Week', '2 Weeks', '1 Month', 'Custom']
+                            },
+                          ].map(field => (
+                            <div key={field.name}>
+                              <label className="block text-xs font-medium text-gray-500 mb-1">{field.label}</label>
+                              <Controller
+                                name={field.name as any}
+                                control={control}
+                                render={({ field: inputField }) => (
+                                  <select
+                                    {...inputField}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                  >
+                                    <option value="">Select {field.label}</option>
+                                    {field.options.map(option => (
+                                      <option key={option} value={option}>{option}</option>
+                                    ))}
+                                  </select>
+                                )}
+                              />
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -828,14 +1129,14 @@ const removeImage = (index: number) => {
                           </h3>
                           <button
                             type="button"
-                            onClick={() => appendVariant({ 
-                              name: '', 
-                              price: 0, 
-                              comparePrice: 0, 
-                              costPrice: 0, 
+                            onClick={() => appendVariant({
+                              name: '',
+                              price: 0,
+                              comparePrice: 0,
+                              costPrice: 0,
                               sku: '',
                               weight: 0,
-                              isActive: true 
+                              isActive: true
                             })}
                             className="flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                           >
@@ -843,7 +1144,7 @@ const removeImage = (index: number) => {
                             Add Variant
                           </button>
                         </div>
-                        
+
                         {variantFields.length > 0 ? (
                           <div className="space-y-4">
                             {variantFields.map((field, index) => (
@@ -858,7 +1159,7 @@ const removeImage = (index: number) => {
                                     <X className="w-4 h-4" />
                                   </button>
                                 </div>
-                                
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -877,7 +1178,7 @@ const removeImage = (index: number) => {
                                       )}
                                     />
                                   </div>
-                                  
+
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                       Price (NPR) *
@@ -897,7 +1198,7 @@ const removeImage = (index: number) => {
                                       )}
                                     />
                                   </div>
-                                  
+
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                       Compare Price (NPR)
@@ -917,7 +1218,7 @@ const removeImage = (index: number) => {
                                       )}
                                     />
                                   </div>
-                                  
+
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                       Cost Price (NPR)
@@ -937,7 +1238,7 @@ const removeImage = (index: number) => {
                                       )}
                                     />
                                   </div>
-                                  
+
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                       SKU
@@ -955,7 +1256,7 @@ const removeImage = (index: number) => {
                                       )}
                                     />
                                   </div>
-                                  
+
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                       Weight (kg)
@@ -976,7 +1277,7 @@ const removeImage = (index: number) => {
                                     />
                                   </div>
                                 </div>
-                                
+
                                 <div className="mt-3 flex items-center">
                                   <Controller
                                     name={`variants.${index}.isActive`}
@@ -1186,42 +1487,109 @@ const removeImage = (index: number) => {
 
                   {/* Media Tab */}
                   {activeTab === 'media' && (
-                    <div className="space-y-6">
+                    <div className="space-y-8">
+                      {/* Main Image */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Product Images *
-                        </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                          {previewImages.length > 0 ? (
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                              {previewImages.map((image, index) => (
-                                <div key={index} className="relative group">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                          <ImageIcon className="w-5 h-5 mr-2 text-blue-600" />
+                          Main Product Image
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                          <div className="space-y-4">
+                            <Controller
+                              name="imageUrl"
+                              control={control}
+                              render={({ field }) => (
+                                <div className="space-y-4">
+                                  <div className="flex gap-2">
+                                    <input
+                                      {...field}
+                                      type="text"
+                                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                      placeholder="Main image URL"
+                                    />
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      className="hidden"
+                                      id="main-image-upload"
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const reader = new FileReader();
+                                          reader.onload = (ev) => {
+                                            field.onChange(ev.target?.result);
+                                          };
+                                          reader.readAsDataURL(file);
+                                        }
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor="main-image-upload"
+                                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors text-sm"
+                                    >
+                                      Upload
+                                    </label>
+                                  </div>
+                                </div>
+                              )}
+                            />
+                            {errors.imageUrl && (
+                              <p className="text-red-500 text-sm mt-1">{String(errors.imageUrl.message)}</p>
+                            )}
+                          </div>
+                          <div className="relative aspect-video bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
+                            {watch('imageUrl') ? (
+                              <img
+                                src={watch('imageUrl')}
+                                alt="Main preview"
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+                                <ImageIcon className="w-12 h-12 mb-2" />
+                                <span className="text-sm">Main Image Preview</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Gallery Images */}
+                      <div className="border-t pt-8">
+                        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                          <ImageIcon className="w-5 h-5 mr-2 text-blue-600" />
+                          Gallery Images
+                        </h3>
+                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50/50">
+                          {previewImages.filter(img => img !== watch('imageUrl')).length > 0 ? (
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+                              {previewImages.filter(img => img !== watch('imageUrl')).map((image, index) => (
+                                <div key={index} className="relative group aspect-square rounded-lg overflow-hidden bg-white border border-gray-200 shadow-sm">
                                   <img
                                     src={image}
-                                    alt={`Preview ${index + 1}`}
-                                    className="w-full h-auto object-cover rounded-lg"
-                                    onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
-                                    }}
+                                    alt={`Gallery ${index + 1}`}
+                                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
                                   />
-                                  <button
-                                    type="button"
-                                    onClick={() => removeImage(index)}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                  <div className="absolute top-2 left-2 bg-black/50 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
-                                    {index + 1}
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button
+                                      type="button"
+                                      onClick={() => removeImage(index)}
+                                      className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transform scale-0 group-hover:scale-100 transition-transform"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
                                   </div>
                                 </div>
                               ))}
                             </div>
                           ) : (
-                            <div className="space-y-4">
+                            <div className="py-8 space-y-3">
                               <Upload className="w-12 h-12 text-gray-400 mx-auto" />
-                              <p className="text-gray-500">Upload product images</p>
+                              <div className="text-gray-500">
+                                <p className="font-medium">No gallery images uploaded</p>
+                                <p className="text-xs">Upload additional images for the product gallery</p>
+                              </div>
                             </div>
                           )}
                           <input
@@ -1230,269 +1598,155 @@ const removeImage = (index: number) => {
                             multiple
                             onChange={handleImageUpload}
                             className="hidden"
-                            id="image-upload"
+                            id="gallery-upload"
                           />
                           <label
-                            htmlFor="image-upload"
-                            className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 cursor-pointer transition-colors"
+                            htmlFor="gallery-upload"
+                            className="inline-flex items-center px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 cursor-pointer transition-all shadow-sm font-medium"
                           >
-                            Choose Images
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Gallery Images
                           </label>
                         </div>
-                        {errors.images && (
-                          <p className="text-red-500 text-sm mt-1">{String(errors.images.message)}</p>
-                        )}
+                      </div>
+
+                      {/* Video URL */}
+                      <div className="border-t pt-8">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Video URL (YouTube/Vimeo)
+                        </label>
+                        <Controller
+                          name="videoUrl"
+                          control={control}
+                          render={({ field }) => (
+                            <div className="relative">
+                              <ExternalLink className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                              <input
+                                {...field}
+                                type="url"
+                                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm"
+                                placeholder="https://www.youtube.com/watch?v=..."
+                              />
+                            </div>
+                          )}
+                        />
                       </div>
                     </div>
                   )}
 
-                  {/* SEO Tab */}
+                  {/* SEO & Social Tab */}
                   {activeTab === 'seo' && (
-                    <div className="space-y-6">
-                      {/* Slug Field */}
-                      <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                          <Link className="w-4 h-4 mr-2 text-blue-600" />
-                          URL Slug *
-                        </label>
-                        <Controller
-                          name="slug"
-                          control={control}
-                          render={({ field }) => (
-                            <div>
-                              <input
-                                {...field}
-                                type="text"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                placeholder="product-url-slug"
-                              />
-                              <p className="text-xs text-gray-500 mt-1">
-                                URL-friendly version of the product name. Only lowercase letters, numbers, and hyphens allowed.
-                              </p>
-                            </div>
-                          )}
-                        />
-                        {errors.slug && (
-                          <p className="text-red-500 text-sm mt-1">{String(errors.slug.message)}</p>
-                        )}
-                      </div>
-
-                      {/* SEO Title */}
-                      <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                          <Search className="w-4 h-4 mr-2 text-blue-600" />
-                          SEO Title
-                        </label>
-                        <Controller
-                          name="seo.title"
-                          control={control}
-                          render={({ field }) => (
-                            <div>
-                              <input
-                                {...field}
-                                type="text"
-                                maxLength={60}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                placeholder="SEO optimized title"
-                              />
-                              <p className="text-xs text-gray-500 mt-1">
-                                {field.value?.length || 0}/60 characters. Recommended: 50-60 characters for optimal search results display.
-                              </p>
-                            </div>
-                          )}
-                        />
-                        {(errors.seo as any)?.title && (
-                          <p className="text-red-500 text-sm mt-1">{String((errors.seo as any)?.title?.message)}</p>
-                        )}
-                      </div>
-
-                      {/* SEO Description */}
-                      <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                          <Hash className="w-4 h-4 mr-2 text-blue-600" />
-                          Meta Description
-                        </label>
-                        <Controller
-                          name="seo.description"
-                          control={control}
-                          render={({ field }) => (
-                            <div>
-                              <textarea
-                                {...field}
-                                rows={3}
-                                maxLength={160}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                placeholder="SEO optimized description that appears in search results"
-                              />
-                              <p className="text-xs text-gray-500 mt-1">
-                                {field.value?.length || 0}/160 characters. Recommended: 150-160 characters for optimal search results display.
-                              </p>
-                            </div>
-                          )}
-                        />
-                        {(errors.seo as any)?.description && (
-                          <p className="text-red-500 text-sm mt-1">{String((errors.seo as any)?.description?.message)}</p>
-                        )}
-                      </div>
-
-                      {/* SEO Keywords */}
-                      <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                          <Hash className="w-4 h-4 mr-2 text-blue-600" />
-                          Meta Keywords
-                        </label>
-                        <div className="space-y-2">
-                          {keywordFields.map((field, index) => (
-                            <div key={field.id} className="flex gap-2">
-                              <Controller
-                                name={`seo.keywords.${index}`}
-                                control={control}
-                                render={({ field }) => (
-                                  <input
-                                    {...field}
-                                    type="text"
-                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                    placeholder="Enter keyword"
-                                  />
-                                )}
-                              />
-                              <button
-                                type="button"
-                                onClick={() => removeKeyword(index)}
-                                className="px-3 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ))}
-                          <button
-                            type="button"
-                            onClick={addKeyword}
-                            className="flex items-center px-3 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-                          >
-                            <Plus className="w-4 h-4 mr-1" />
-                            Add Keyword
-                          </button>
-                          <p className="text-xs text-gray-500">
-                            Add relevant keywords that describe your product. Maximum 10 keywords recommended.
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Open Graph Fields */}
-                      <div className="border-t pt-6">
-                        <h3 className="flex items-center text-lg font-medium text-gray-900 mb-4">
-                          <Globe className="w-5 h-5 mr-2 text-blue-600" />
-                          Open Graph (Social Media)
+                    <div className="space-y-8">
+                      {/* SEO Meta */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-medium text-gray-900 border-b pb-2 flex items-center">
+                          <Search className="w-5 h-5 mr-2 text-blue-600" />
+                          Search Engine Optimization
                         </h3>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                              <Search className="w-4 h-4 mr-2 text-blue-600" />
-                              OG Title
-                            </label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">SEO Title</label>
                             <Controller
-                              name="seo.ogTitle"
+                              name="seoTitle"
                               control={control}
                               render={({ field }) => (
-                                <input
-                                  {...field}
-                                  type="text"
-                                  maxLength={60}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                  placeholder="Title for social media sharing"
-                                />
+                                <input {...field} type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm" placeholder="Meta title (max 200 chars)" />
                               )}
                             />
                           </div>
-
                           <div>
-                            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                              <ImageIcon className="w-4 h-4 mr-2 text-blue-600" />
-                              OG Image URL
-                            </label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">SEO Slug</label>
                             <Controller
-                              name="seo.ogImage"
+                              name="seoSlug"
                               control={control}
                               render={({ field }) => (
-                                <input
-                                  {...field}
-                                  type="url"
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                  placeholder="https://example.com/image.jpg"
-                                />
+                                <input {...field} type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm" placeholder="url-friendly-slug" />
                               )}
                             />
                           </div>
                         </div>
-
-                        <div className="mt-4">
-                          <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <Hash className="w-4 h-4 mr-2 text-blue-600" />
-                            OG Description
-                          </label>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">SEO Description</label>
                           <Controller
-                            name="seo.ogDescription"
+                            name="seoDescription"
                             control={control}
                             render={({ field }) => (
-                              <textarea
-                                {...field}
-                                rows={2}
-                                maxLength={160}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                placeholder="Description for social media sharing"
-                              />
+                              <textarea {...field} rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm" placeholder="Meta description for search results" />
+                            )}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
+                          <Controller
+                            name="seoKeywords"
+                            control={control}
+                            render={({ field }) => (
+                              <input {...field} type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black text-sm" placeholder="keyword1, keyword2, keyword3" />
                             )}
                           />
                         </div>
                       </div>
 
-                      {/* Additional SEO Fields */}
-                      <div className="border-t pt-6">
-                        <h3 className="flex items-center text-lg font-medium text-gray-900 mb-4">
-                          <Target className="w-5 h-5 mr-2 text-blue-600" />
-                          Additional SEO
+                      {/* Social Media (OG/Twitter) */}
+                      <div className="space-y-4 border-t pt-8">
+                        <h3 className="text-lg font-medium text-gray-900 border-b pb-2 flex items-center">
+                          <Globe className="w-5 h-5 mr-2 text-blue-500" />
+                          Social Media Meta
                         </h3>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                              <ExternalLink className="w-4 h-4 mr-2 text-blue-600" />
-                              Canonical URL
-                            </label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">OG Title</label>
                             <Controller
-                              name="seo.canonicalUrl"
+                              name="ogTitle"
                               control={control}
-                              render={({ field }) => (
-                                <input
-                                  {...field}
-                                  type="url"
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                  placeholder="https://example.com/product-page"
-                                />
-                              )}
+                              render={({ field }) => <input {...field} type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black text-sm" placeholder="Social share title" />}
                             />
                           </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">OG Image URL</label>
+                            <Controller
+                              name="ogImage"
+                              control={control}
+                              render={({ field }) => <input {...field} type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black text-sm" placeholder="https://example.com/share-image.jpg" />}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">OG Description</label>
+                          <Controller
+                            name="ogDescription"
+                            control={control}
+                            render={({ field }) => <textarea {...field} rows={2} className="w-full px-3 py-2 border border-gray-300 rounded-lg text-black text-sm" placeholder="Social share description" />}
+                          />
+                        </div>
+                      </div>
 
-                          <div>
-                            <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                              <Target className="w-4 h-4 mr-2 text-blue-600" />
-                              Focus Keyword
-                            </label>
-                            <Controller
-                              name="seo.focusKeyword"
-                              control={control}
-                              render={({ field }) => (
-                                <input
-                                  {...field}
-                                  type="text"
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                                  placeholder="Primary keyword for this product"
-                                />
-                              )}
-                            />
-                          </div>
+                      {/* Advanced JSON Schema */}
+                      <div className="space-y-4 border-t pt-8">
+                        <h3 className="text-lg font-medium text-gray-900 border-b pb-2 flex items-center">
+                          <Eye className="w-5 h-5 mr-2 text-gray-500" />
+                          Advanced SEO (JSON-LD)
+                        </h3>
+                        <p className="text-xs text-gray-500 mb-4">You can paste JSON-LD snippets here for rich results.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {['productSchema', 'offerSchema', 'brandSchema', 'faqSchema'].map(schemaName => (
+                            <div key={schemaName}>
+                              <label className="block text-xs font-medium text-gray-500 mb-1 capitalize">{schemaName.replace(/([A-Z])/g, ' $1')}</label>
+                              <Controller
+                                name={schemaName as any}
+                                control={control}
+                                render={({ field }) => (
+                                  <textarea
+                                    {...field}
+                                    value={typeof field.value === 'object' ? JSON.stringify(field.value, null, 2) : field.value || ''}
+                                    rows={3}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-xs bg-gray-50 text-black"
+                                    placeholder="{}"
+                                  />
+                                )}
+                              />
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -1645,7 +1899,7 @@ const removeImage = (index: number) => {
                             <div className="flex items-center">
                               <Clock className="w-5 h-5 text-blue-600 mr-2" />
                               <span className="text-sm font-medium text-blue-800">
-                                Delivery Time Display: 
+                                Delivery Time Display:
                                 <span className="ml-2 text-blue-600">
                                   {watch('minDeliveryDays') || 3} - {watch('maxDeliveryDays') || 7} days
                                 </span>
@@ -2017,6 +2271,7 @@ const removeImage = (index: number) => {
                       </div>
                     </div>
                   )}
+
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -2052,17 +2307,14 @@ const removeImage = (index: number) => {
                     Previous
                   </button>
                 )}
-                {activeTab !== 'advanced' && activeTab !== 'shipping' && (
-                  <button
-                    type="button"
-                    onClick={handleNextTab}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center"
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </button>
-                )}
-                {/* Create/Update Product button - available on all tabs */}
+                <button
+                  type="button"
+                  onClick={handleNextTab}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center"
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || isLoading}

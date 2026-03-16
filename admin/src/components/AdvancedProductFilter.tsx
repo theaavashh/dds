@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, X, Calendar, DollarSign, Package, Star, ChevronDown, ChevronUp } from 'lucide-react';
 import { productFilterSchema, ProductFilterData } from '@/schemas/productSchema';
+import { useCategories } from '@/hooks/useCategories';
 
 interface Category {
   id: string;
@@ -16,17 +17,19 @@ interface Category {
 
 interface AdvancedProductFilterProps {
   onFilterChange: (filters: ProductFilterData) => void;
-  categories: Category[];
   isLoading?: boolean;
 }
 
 const AdvancedProductFilter: React.FC<AdvancedProductFilterProps> = ({
   onFilterChange,
-  categories,
   isLoading = false
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Fetch categories using TanStack Query
+  const { data: categoriesResponse, isLoading: categoriesLoading } = useCategories();
+  const categories = categoriesResponse?.data || [];
 
   const {
     control,

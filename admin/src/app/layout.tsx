@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthAndQueryProvider } from "@/providers/AuthAndQueryProvider";
 import { Toaster } from "react-hot-toast";
 import { titleFont } from "./fonts";
 
@@ -17,9 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${titleFont.className} ${titleFont.variable} font-sans`}
+        className={`${titleFont.className} ${titleFont.variable}`}
       >
-        <AuthProvider>
+        <AuthAndQueryProvider>
           {children}
           <Toaster
             position="top-right"
@@ -45,7 +45,7 @@ export default function RootLayout({
               },
             }}
           />
-        </AuthProvider>
+        </AuthAndQueryProvider>
       </body>
     </html>
   );
